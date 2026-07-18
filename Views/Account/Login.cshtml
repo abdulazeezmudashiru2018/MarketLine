@@ -1,0 +1,406 @@
+﻿@model IEnumerable<MarketLine.Models.LandingMedia>
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MarketLine - Login</title>
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+<body>
+
+    <!-- ===== CUSTOM ALERT MODAL ===== -->
+    <div id="customAlert" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <div class="custom-alert-icon" id="alertIcon">⚠️</div>
+            <h3 id="alertTitle">Notice</h3>
+            <p id="alertMessage">Message here</p>
+            <button type="button" class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
+        </div>
+    </div>
+
+    <div class="login-page">
+        <div class="login-card">
+
+            <!-- LEFT: Login & Forgot Password Form -->
+            <div class="login-left">
+                <div class="login-brand">
+                    <div class="brand-icon">🛒</div>
+                    <div class="brand-text">
+                        <span class="brand-name">MARKET</span>
+                        <span class="brand-sub">LINE</span>
+                    </div>
+                </div>
+
+                <!-- NORMAL LOGIN STATE -->
+                <div id="loginFormState">
+                    <h2>Welcome Back!</h2>
+                    <p class="login-sub">Please sign in to your account</p>
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert-success">@TempData["Success"]</div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert-error">@TempData["Error"]</div>
+                    }
+
+                    <form asp-action="Login" method="post" class="login-form" id="loginForm">
+                        <div class="input-group">
+                            <span class="input-icon">👤</span>
+                            <input type="text" name="username" id="usernameInput" placeholder="Username or Email" autocomplete="off" required />
+                        </div>
+
+                        <div class="input-group">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" name="password" id="pwd" placeholder="Password" autocomplete="new-password" required />
+                            <span class="input-eye" onclick="togglePwd('pwd')">👁️</span>
+                        </div>
+
+                        <div class="options">
+                            <label class="remember">
+                                <input type="checkbox" name="rememberMe" /> Remember me
+                            </label>
+                            <a href="javascript:void(0)" class="forgot" onclick="showForgotPassword()">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="btn-login">🔐 LOGIN</button>
+                    </form>
+
+                    <div class="or-divider">OR LOGIN WITH</div>
+
+                    <div class="social-buttons">
+                        <button class="social-btn">G</button>
+                        <button class="social-btn">f</button>
+                        <button class="social-btn"></button>
+                    </div>
+
+                    <p class="register-link">
+                        Don't have an account? <a href="javascript:void(0)" id="registerBtn">Register here</a>
+                    </p>
+
+                    <p class="manage-link">
+                        <a href="/Account/ManageMedia">⚙️ Manage Landing Media</a>
+                    </p>
+                </div>
+
+                <!-- FORGOT PASSWORD FLOW STATE -->
+                <div id="forgotPasswordState" style="display: none;">
+                    <h2 id="forgotTitle">Forgot Password</h2>
+                    <p class="login-sub" id="forgotSubtitle">Verify your identity to reset password</p>
+
+                    <div id="forgotError" class="alert-error" style="display: none;"></div>
+
+                    <!-- STEP 1: Verification inputs -->
+                    <div id="forgotStep1">
+                        <div class="input-group" style="margin-bottom: 12px;">
+                            <span class="input-icon">✉️</span>
+                            <input type="email" id="forgotEmail" placeholder="Enter your email" autocomplete="off" />
+                        </div>
+                        <div class="input-group" style="margin-bottom: 18px;">
+                            <span class="input-icon">📞</span>
+                            <input type="text" id="forgotPhone" placeholder="Enter your phone number" autocomplete="off" />
+                        </div>
+                        <button type="button" class="btn-verify-glow" onclick="verifyIdentity()">Verify</button>
+                    </div>
+
+                    <!-- STEP 2: Password Reset inputs (Hidden by default) -->
+                    <div id="forgotStep2" style="display: none;">
+                        <input type="hidden" id="verifiedUserId" />
+                        <div class="input-group" style="margin-bottom: 12px;">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="newPassword" placeholder="Enter new password" autocomplete="new-password" />
+                            <span class="input-eye" onclick="togglePwd('newPassword')">👁️</span>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 18px;">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="confirmNewPassword" placeholder="Confirm new password" autocomplete="new-password" />
+                            <span class="input-eye" onclick="togglePwd('confirmNewPassword')">👁️</span>
+                        </div>
+                        <button type="button" class="btn-verify-glow" onclick="resetUserPassword()">Enter</button>
+                    </div>
+
+                    <p class="register-link" style="margin-top: 20px;">
+                        Remembered details? <a href="javascript:void(0)" onclick="hideForgotPassword()">Back to Login</a>
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: Media Slideshow -->
+            <div class="login-right">
+                @if (!Model.Any())
+                {
+                    <div class="no-media">
+                        <div style="font-size:80px;">🛒</div>
+                        <h2>MARKETLINE SUPERMARKET</h2>
+                        <p>Upload images/videos to display here</p>
+                        <a href="/Account/ManageMedia" class="btn-upload">Upload Media</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="media-slider" id="mediaSlider">
+                        @foreach (var m in Model)
+                        {
+                            if (m.MediaType == "video")
+                            {
+                                <video class="slide" muted loop playsinline>
+                                    <source src="@m.FilePath" type="video/mp4">
+                                </video>
+                            }
+                            else
+                            {
+                                <img class="slide" src="@m.FilePath" alt="Slide" />
+                            }
+                        }
+
+                        <div class="overlay-features">
+                            <div class="feature-item">
+                                <div class="feature-icon">✨</div>
+                                <span>QUALITY<br />PRODUCTS</span>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🏷️</div>
+                                <span>BEST<br />PRICES</span>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🛡️</div>
+                                <span>SECURE<br />PAYMENT</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+                    // ===== CUSTOM ALERT SYSTEM =====
+            function showCustomAlert(message, type = 'error') {
+                const overlay = document.getElementById('customAlert');
+                const icon = document.getElementById('alertIcon');
+                const title = document.getElementById('alertTitle');
+                const msg = document.getElementById('alertMessage');
+                const box = overlay.querySelector('.custom-alert-box');
+
+                // Set icon and title based on type
+                if (type === 'error') {
+                    icon.textContent = '❌';
+                    title.textContent = 'Exception Thrown';
+                    box.className = 'custom-alert-box alert-error-style';
+                } else if (type === 'success') {
+                    icon.textContent = '✅';
+                    title.textContent = 'Success!';
+                    box.className = 'custom-alert-box alert-success-style';
+                } else if (type === 'warning') {
+                    icon.textContent = '⚠️';
+                    title.textContent = 'Warning';
+                    box.className = 'custom-alert-box alert-warning-style';
+                }
+
+                msg.textContent = message;
+                overlay.classList.add('show');
+            }
+
+            function closeCustomAlert() {
+                document.getElementById('customAlert').classList.remove('show');
+            }
+
+            function togglePwd(id) {
+                const pwd = document.getElementById(id);
+                pwd.type = pwd.type === 'password' ? 'text' : 'password';
+            }
+
+            // ===== REGISTRATION LIMIT FLOW =====
+            document.getElementById('registerBtn').addEventListener('click', async function(e) {
+                e.preventDefault();
+                try {
+                    const response = await fetch('/Account/CheckRegistrationLimit');
+                    const data = await response.json();
+                    if (data.limitReached) {
+                       showCustomAlert("Registration limit exceeded. No more user accounts can be registered on this platform.", 'warning');
+                    } else {
+                        window.location.href = "/Account/Register";
+                    }
+                } catch (err) {
+                    console.error("Verification error:", err);
+                    window.location.href = "/Account/Register";
+                }
+            });
+
+            // ===== FORGOT PASSWORD LOGIC =====
+            function showForgotPassword() {
+                document.getElementById('loginFormState').style.display = 'none';
+                document.getElementById('forgotPasswordState').style.display = 'block';
+                resetForgotForms();
+            }
+
+            function hideForgotPassword() {
+                document.getElementById('forgotPasswordState').style.display = 'none';
+                document.getElementById('loginFormState').style.display = 'block';
+            }
+
+            function resetForgotForms() {
+                document.getElementById('forgotStep1').style.display = 'block';
+                document.getElementById('forgotStep2').style.display = 'none';
+                document.getElementById('forgotError').style.display = 'none';
+                document.getElementById('forgotEmail').value = '';
+                document.getElementById('forgotPhone').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+                document.getElementById('forgotTitle').innerText = 'Forgot Password';
+                document.getElementById('forgotSubtitle').innerText = 'Verify your identity to reset password';
+            }
+
+            async function verifyIdentity() {
+                const email = document.getElementById('forgotEmail').value.trim();
+                const phone = document.getElementById('forgotPhone').value.trim();
+                const errorDiv = document.getElementById('forgotError');
+                errorDiv.style.display = 'none';
+
+                if (!email && !phone) {
+                    errorDiv.innerText = "Please fill in either your email or phone number.";
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/Account/VerifyForgotPassword', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, phone: phone })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        document.getElementById('verifiedUserId').value = data.userId;
+                        document.getElementById('forgotStep1').style.display = 'none';
+                        document.getElementById('forgotStep2').style.display = 'block';
+                        document.getElementById('forgotTitle').innerText = 'Set New Password';
+                        document.getElementById('forgotSubtitle').innerText = 'Choose a strong password security';
+                    } else {
+                       showCustomAlert(data.message, 'error');
+                        errorDiv.innerText = data.message;
+                        errorDiv.style.display = 'block';
+                    }
+                } catch (err) {
+                    console.error("Communication error:", err);
+                    errorDiv.innerText = "Connection lost. Please try again.";
+                    errorDiv.style.display = 'block';
+                }
+            }
+
+            async function resetUserPassword() {
+                const userId = document.getElementById('verifiedUserId').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmNewPassword').value;
+                const errorDiv = document.getElementById('forgotError');
+                errorDiv.style.display = 'none';
+
+                if (!newPassword || !confirmPassword) {
+                    errorDiv.innerText = "Please complete both password fields.";
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    errorDiv.innerText = "Passwords do not match.";
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/Account/ResetPassword', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: parseInt(userId), newPassword: newPassword })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                       showCustomAlert("Password changed successfully! You can now log in with your new password.", 'success');
+                        hideForgotPassword();
+                        // Pre-fill username field with verified email if provided
+                        const email = document.getElementById('forgotEmail').value.trim();
+                        if (email) {
+                            document.getElementById('usernameInput').value = email;
+                        }
+                    } else {
+                        errorDiv.innerText = data.message;
+                        errorDiv.style.display = 'block';
+                    }
+                } catch (err) {
+                    console.error("Communication error:", err);
+                    errorDiv.innerText = "Connection lost. Please try again.";
+                    errorDiv.style.display = 'block';
+                }
+            }
+
+            // ===== SLIDESHOW & AUTO AUDIO =====
+            const slides = document.querySelectorAll('.slide');
+            let current = 0;
+            let userInteracted = false;
+
+            if (slides.length > 0) {
+                slides[0].classList.add('active');
+                if (slides[0].tagName === 'VIDEO') {
+                    slides[0].muted = true;
+                    slides[0].play();
+                }
+
+                if (slides.length > 1) {
+                    setInterval(() => {
+                        const prev = slides[current];
+                        prev.classList.remove('active');
+                        if (prev.tagName === 'VIDEO') {
+                            prev.pause();
+                            prev.currentTime = 0;
+                        }
+
+                        current = (current + 1) % slides.length;
+
+                        const next = slides[current];
+                        next.classList.add('active');
+                        if (next.tagName === 'VIDEO') {
+                            next.muted = !userInteracted;
+                            next.play();
+                        }
+                    }, 5000);
+                }
+            }
+
+            function enableSound() {
+                userInteracted = true;
+                document.querySelectorAll('video.slide').forEach(v => {
+                    v.muted = false;
+                });
+                document.removeEventListener('click', enableSound);
+                document.removeEventListener('keydown', enableSound);
+                document.removeEventListener('scroll', enableSound);
+                document.removeEventListener('mousemove', enableSound);
+            }
+
+            document.addEventListener('click', enableSound);
+            document.addEventListener('keydown', enableSound);
+            document.addEventListener('scroll', enableSound);
+            document.addEventListener('mousemove', enableSound);
+
+            // ===== FORCE CLEAR FOR INPUTS ON PAGE SHOW =====
+            window.addEventListener('pageshow', function (event) {
+                const usernameField = document.getElementById('usernameInput');
+                const passwordField = document.getElementById('pwd');
+                if (usernameField) usernameField.value = '';
+                if (passwordField) passwordField.value = '';
+                const form = document.getElementById('loginForm');
+                if (form) form.reset();
+            });
+    </script>
+</body>
+</html>

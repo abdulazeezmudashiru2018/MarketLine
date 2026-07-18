@@ -1,0 +1,571 @@
+﻿
+
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body.order-body {
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    background: #f8fafc;
+    padding: 30px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ✨ Fine Glowing Background */
+.glow-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fef3f2 0%, #eef2ff 50%, #f0f9ff 100%);
+}
+
+.glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.55;
+    animation: float 14s ease-in-out infinite;
+}
+
+.orb1 {
+    width: 420px;
+    height: 420px;
+    background: #ff8a3d;
+    top: -100px;
+    left: -80px;
+}
+
+.orb2 {
+    width: 500px;
+    height: 500px;
+    background: #667eea;
+    top: 40%;
+    right: -120px;
+    animation-delay: -4s;
+}
+
+.orb3 {
+    width: 380px;
+    height: 380px;
+    background: #f472b6;
+    bottom: -80px;
+    left: 30%;
+    animation-delay: -7s;
+}
+
+.orb4 {
+    width: 340px;
+    height: 340px;
+    background: #38bdf8;
+    top: 20%;
+    left: 40%;
+    animation-delay: -10s;
+    opacity: 0.35;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translate(0,0) scale(1);
+    }
+
+    50% {
+        transform: translate(40px,-30px) scale(1.1);
+    }
+}
+
+/* Layout */
+.order-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+}
+
+.products-panel, .cart-panel {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,0.6);
+}
+
+.panel-header {
+    padding: 20px 25px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-orange {
+    background: linear-gradient(135deg, #ff7a1a, #ff9a4d);
+}
+
+.header-blue {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.header-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.panel-header h2 {
+    font-size: 22px;
+}
+
+.panel-header p {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* Products */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 15px;
+    padding: 20px;
+}
+
+.product-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    transition: 0.25s;
+}
+
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(255,122,26,0.15);
+        border-color: #ff7a1a;
+    }
+
+.product-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.product-icon {
+    font-size: 32px;
+}
+
+.product-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.badge {
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.product-card h3 {
+    margin: 10px 0 5px;
+    font-size: 15px;
+}
+
+.product-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.price {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.btn-add {
+    background: linear-gradient(135deg,#ff7a1a,#ff9a4d);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .btn-add:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 15px rgba(255,122,26,0.4);
+    }
+
+/* Cart */
+.checkout-form {
+    padding: 20px;
+}
+
+.cart-empty {
+    text-align: center;
+    padding: 30px 10px;
+    color: #9ca3af;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+}
+
+.empty-icon {
+    font-size: 50px;
+    opacity: 0.4;
+    margin-bottom: 8px;
+}
+
+.cart-list {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.section-title {
+    font-weight: 700;
+    margin: 15px 0 10px;
+    font-size: 14px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    transition: 0.2s;
+}
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+    }
+
+.row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.pay-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .pay-option.selected {
+        background: #eef2ff;
+        border-color: #667eea;
+    }
+
+.btn-place-order {
+    width: 100%;
+    margin-top: 15px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg,#ff7a1a,#ff9a4d);
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .btn-place-order:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-place-order:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255,122,26,0.4);
+    }
+
+@media (max-width: 992px) {
+    .order-container {
+        grid-template-columns: 1fr;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ===== MODAL STYLES ===== */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
+    color: #1f2937;
+}
+
+.account-details {
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    border-left: 4px solid #ff7a1a;
+}
+
+    .account-details p {
+        padding: 6px 0;
+        font-size: 14px;
+        color: #374151;
+    }
+
+.card-form label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 10px 0 5px;
+}
+
+.card-form input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+    .card-form input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+    }
+
+.btn-confirm {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+    .btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16,185,129,0.4);
+    }
+
+.btn-cancel {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+    .btn-cancel:hover {
+        background: #f3f4f6;
+    }
+
+/* Cart item remove button */
+.remove-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+    .remove-btn:hover {
+        color: #b91c1c;
+    }
+
+
+/* Force modal to display properly */
+.modal {
+    display: none;
+}
+
+    .modal.show {
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 99999 !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        justify-content: center !important;
+        align-items: center !important;
+        backdrop-filter: blur(4px) !important;
+    }
+
+/* ==========================================================
+   PINNED CART & CHECKOUT PANEL
+   Desktop only: cart stays visible while products scroll.
+   ========================================================== */
+
+@media (min-width: 993px) {
+
+    /* Prevent grid items from stretching each other */
+    .order-container {
+        align-items: start;
+    }
+
+    /* Keep cart panel pinned at the top of the visible screen */
+    .cart-panel {
+        position: sticky;
+        top: 30px; /* Matches body.order-body padding */
+        align-self: start;
+        /*
+           Screen height minus top/bottom page padding.
+           The cart stays fully inside the visible screen.
+        */
+        height: calc(100vh - 60px);
+        height: calc(100dvh - 60px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+        /* Cart heading always remains at the top */
+        .cart-panel .panel-header {
+            flex: 0 0 auto;
+        }
+
+        /*
+       Checkout content scrolls INSIDE the pinned cart panel
+       when there are many cart products or form fields.
+    */
+        .cart-panel .checkout-form {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding-right: 14px;
+        }
+
+    /*
+       Cart item list gets its own scroll area.
+       This prevents 100+ cart items from pushing
+       shipping/payment information out of view.
+    */
+    #cartItems.cart-list {
+        max-height: clamp(170px, 34vh, 340px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-right: 6px;
+    }
+
+        /* Make cart item scrolling look clean */
+        .cart-panel .checkout-form::-webkit-scrollbar,
+        #cartItems.cart-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .cart-panel .checkout-form::-webkit-scrollbar-track,
+        #cartItems.cart-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .cart-panel .checkout-form::-webkit-scrollbar-thumb,
+        #cartItems.cart-list::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.42);
+            border-radius: 20px;
+        }
+
+            .cart-panel .checkout-form::-webkit-scrollbar-thumb:hover,
+            #cartItems.cart-list::-webkit-scrollbar-thumb:hover {
+                background: rgba(102, 126, 234, 0.72);
+            }
+
+    /*
+       Keep Place Order button visible while cashier scrolls
+       through cart items/shipping details inside the cart panel.
+    */
+    .cart-panel .btn-place-order {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        margin-bottom: 0;
+        box-shadow: 0 -8px 18px rgba(255, 255, 255, 0.82);
+    }
+}
+
+/* Mobile/tablet: normal layout, no pinned cart */
+@media (max-width: 992px) {
+    .cart-panel {
+        position: static;
+        height: auto;
+    }
+}

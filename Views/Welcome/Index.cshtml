@@ -1,0 +1,218 @@
+﻿@using MarketLine.Models
+@using System.Collections.Generic
+@using System.Linq
+@{
+    Layout = null;
+    ViewData["Title"] = "Welcome to Prestige Soft Drinks & Super Mart";
+    var leftItems = (List<LandingMedia>)ViewBag.LeftMediaItems;
+    var rightItems = (List<LandingMedia>)ViewBag.RightMediaItems;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/welcome.css" asp-append-version="true" />
+</head>
+<body>
+
+    @Html.AntiForgeryToken()
+
+    <div class="welcome-page">
+
+        <!-- LEFT hero media -->
+        <div class="hero-media hero-media-left" id="heroMediaLeft" data-slot="left">
+            <div class="hero-media-inner" id="heroMediaLeftInner">
+                @if (leftItems.Any())
+                {
+                    for (int i = 0; i < leftItems.Count; i++)
+                    {
+                        var item = leftItems[i];
+                        <div class="hero-slide @(i == 0 ? "active" : "")" data-id="@item.Id">
+                            @if (item.MediaType == "video")
+                            {
+                                <video src="@item.FilePath" muted loop playsinline preload="metadata"></video>
+                            }
+                            else
+                            {
+                                <img src="@item.FilePath" alt="Store" />
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="hero-media-placeholder" id="heroMediaLeftPlaceholder">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V5a4 4 0 0 1 8 0v2" /></svg>
+                        <span>Add a photo or video</span>
+                    </div>
+                }
+            </div>
+            <button type="button" class="hero-media-edit-btn" data-slot="left" aria-label="Change left photo or video">
+                <svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16v4Z" /><path d="m14.5 5.5 4 4" /></svg>
+            </button>
+        </div>
+
+        <!-- CENTER content -->
+        <!-- CENTER content -->
+        <div class="welcome-content">
+
+            <!-- Fine supermarket image watermark behind the write-up only -->
+            <div class="welcome-watermark" aria-hidden="true"></div>
+
+            <div class="welcome-badges">
+                <div class="welcome-badge">
+                    <svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" /><path d="M8 6V5a4 4 0 0 1 8 0v1" /><path d="m9 12 2 2 4-4" /></svg>
+                    <span>BEST QUALITY<br /><strong>EVERYDAY</strong></span>
+                </div>
+                <div class="welcome-badge welcome-badge-gold">
+                    <svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5Z" /><path d="m2 17 10 5 10-5" /><path d="m2 12 10 5 10-5" /></svg>
+                    <span>BEST PRICES<br /><strong>GUARANTEED</strong></span>
+                </div>
+            </div>
+
+            <div class="welcome-cart-icon">
+                <svg viewBox="0 0 64 64">
+                    <circle cx="22" cy="54" r="4" fill="#ffd76a" />
+                    <circle cx="46" cy="54" r="4" fill="#ffd76a" />
+                    <path d="M6 10h6l6 30h30l6-20H16" fill="none" stroke="#ffd76a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="26" cy="20" r="4" fill="#7ed957" />
+                    <circle cx="35" cy="17" r="4.5" fill="#ff6b6b" />
+                    <circle cx="43" cy="21" r="3.6" fill="#4fa3ff" />
+                    <rect x="30" y="10" width="5" height="10" rx="2" fill="#ffb703" transform="rotate(15 32 15)" />
+                </svg>
+            </div>
+
+            <h1 class="welcome-title">PRESTIGE</h1>
+            <h2 class="welcome-subtitle"><span class="dash">—</span> SOFT DRINKS <span class="dash">—</span></h2>
+            <p class="welcome-and">AND</p>
+            <h3 class="welcome-supermart">SUPER MART</h3>
+            <p class="welcome-tagline">QUALITY <span>•</span> AFFORDABILITY <span>•</span> TRUST</p>
+
+            <div class="welcome-divider">
+                <span></span><i></i><span></span>
+            </div>
+
+            <h4 class="welcome-heading">
+                YOU ARE WELCOME TO<br />
+                PRESTIGE SOFT DRINKS<br />
+                AND SUPERMART.
+            </h4>
+
+            <div class="welcome-info-bar">
+                <div class="welcome-info-item">
+                    <svg viewBox="0 0 24 24"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+                    <div><span>ADDRESS</span><p>Formal Dave-mercy clinic, Iddiagbon, Jabba, Moro LGA, Kwara State.</p></div>
+                </div>
+                <div class="welcome-info-item">
+                    <svg viewBox="0 0 24 24"><path d="M4 4h4l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v4a2 2 0 0 1-2 2C9.5 22 2 14.5 2 6a2 2 0 0 1 2-2Z" /></svg>
+                    <div><span>PHONE</span><p>09067311761<br />08125797237</p></div>
+                </div>
+                <div class="welcome-info-item">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+                    <div><span>EMAIL</span><p>abdulazeezmudashiru2018@gmail.com</p></div>
+                </div>
+                <div class="welcome-info-item">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3.5 2" /></svg>
+                    <div><span>OPENING HOURS</span><p>Mon – Sat: 8:00AM – 9:00PM<br />Sunday: 10:00AM – 6:00PM</p></div>
+                </div>
+            </div>
+
+            <div class="welcome-cta-row">
+                <a asp-controller="Order" asp-action="Index" class="welcome-btn welcome-btn-green">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="9" cy="20" r="1.4" />
+                        <circle cx="18" cy="20" r="1.4" />
+                        <path d="M2.5 3h2.5l2.6 12.4a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
+                    </svg>
+                    GO TO SHOPPING
+                </a>
+                <a asp-controller="Account" asp-action="Login" class="welcome-btn welcome-btn-gold">
+                    <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9" /></svg>
+                    GO TO LOGIN
+                </a>
+            </div>
+
+            <div class="welcome-features">
+                <div class="welcome-feature">
+                    <svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v6c0 5 3.4 8.4 7.5 9 4.1-.6 7.5-4 7.5-9V6L12 3Z" /><path d="m9 12 2 2 4-4" /></svg>
+                    <div><strong>100% AUTHENTIC</strong><p>We sell only genuine products.</p></div>
+                </div>
+                <div class="welcome-feature">
+                    <svg viewBox="0 0 24 24"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3Z" /><path d="M7 11l3.5-7a2 2 0 0 1 2 2v3h5.2a2 2 0 0 1 2 2.4l-1.4 6A2 2 0 0 1 16.4 20H7" /></svg>
+                    <div><strong>CUSTOMER SATISFACTION</strong><p>Your satisfaction is our priority.</p></div>
+                </div>
+                <div class="welcome-feature">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="8" width="12" height="9" rx="1.5" /><path d="M14 11h4l3 3v3h-7z" /><circle cx="7" cy="19" r="1.6" /><circle cx="17.5" cy="19" r="1.6" /></svg>
+                    <div><strong>FAST &amp; RELIABLE DELIVERY</strong><p>We deliver to your doorstep.</p></div>
+                </div>
+                <div class="welcome-feature">
+                    <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8" /><path d="M20 4v4h-4" /><path d="M20 12a8 8 0 0 1-13.7 5.7L4 16" /><path d="M4 20v-4h4" /></svg>
+                    <div><strong>EASY RETURNS</strong><p>Hassle-free return policy.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT hero media -->
+        <div class="hero-media hero-media-right" id="heroMediaRight" data-slot="right">
+            <div class="hero-media-inner" id="heroMediaRightInner">
+                @if (rightItems.Any())
+                {
+                    for (int i = 0; i < rightItems.Count; i++)
+                    {
+                        var item = rightItems[i];
+                        <div class="hero-slide @(i == 0 ? "active" : "")" data-id="@item.Id">
+                            @if (item.MediaType == "video")
+                            {
+                                <video src="@item.FilePath" muted loop playsinline preload="metadata"></video>
+                            }
+                            else
+                            {
+                                <img src="@item.FilePath" alt="Store aisle" />
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="hero-media-placeholder" id="heroMediaRightPlaceholder">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V5a4 4 0 0 1 8 0v2" /></svg>
+                        <span>Add a photo or video</span>
+                    </div>
+                }
+            </div>
+            <button type="button" class="hero-media-edit-btn" data-slot="right" aria-label="Change right photo or video">
+                <svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16v4Z" /><path d="m14.5 5.5 4 4" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Upload modal -->
+    <div class="welcome-modal-overlay" id="mediaModalOverlay">
+        <div class="welcome-modal">
+            <h3>Manage slideshow</h3>
+            <p class="welcome-modal-text">These rotate automatically every 5 seconds on the page. Add more, or remove any you no longer want.</p>
+
+            <div class="welcome-slide-manager" id="welcomeSlideManager">
+                <p class="welcome-modal-text">Loading…</p>
+            </div>
+
+            <div class="welcome-modal-add">
+                <input type="file" id="mediaFileInput" accept="image/*,video/*" />
+                <button type="button" class="welcome-modal-save" id="btnSaveMedia">+ Add</button>
+            </div>
+            <p class="welcome-modal-error" id="mediaModalError"></p>
+
+            <div class="welcome-modal-actions">
+                <button type="button" class="welcome-modal-cancel" id="btnCancelMedia">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/welcome.js" asp-append-version="true"></script>
+</body>
+</html>

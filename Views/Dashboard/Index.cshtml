@@ -1,0 +1,833 @@
+@model MarketLine.Models.DashboardViewModel
+@using System.Linq
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewBag.NotificationCount = Model.NotificationCount;
+}
+
+<!-- ✨ Safe Custom Embedded Styles to preserve your external site.css unmodified -->
+<style>
+    /* Floating bonus wheel: does not affect dashboard layout */
+    .ml-bonus-wheel-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    #bonusWheelSvg {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.96;
+        pointer-events: auto;
+        filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.85));
+        transition: transform 0.25s ease, filter 0.25s ease;
+    }
+
+    .ml-chart:hover #bonusWheelSvg {
+        transform: translate(-50%, -50%) scale(1.06);
+        filter: drop-shadow(0 0 22px rgba(74, 222, 128, 1));
+    }
+
+    /* Each of the 12 customer sections */
+    .ml-wheel-slice {
+        stroke: #22c55e;
+        stroke-width: 1.6;
+        cursor: pointer;
+        transition: fill 0.2s ease, stroke 0.2s ease;
+    }
+
+        .ml-wheel-slice:hover {
+            fill: rgba(34, 197, 94, 0.70) !important;
+            stroke: #bbf7d0 !important;
+            stroke-width: 2.5;
+        }
+
+    .ml-wheel-text {
+        fill: #ffffff;
+        font-family: "Segoe UI", sans-serif;
+        font-size: 11px;
+        font-weight: 800;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        pointer-events: none;
+        paint-order: stroke;
+        stroke: #0f172a;
+        stroke-width: 2px;
+        stroke-linejoin: round;
+    }
+
+    .ml-wheel-center-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 56px;
+        height: 56px;
+        transform: translate(-50%, -50%);
+        border: 2px solid #4ade80;
+        border-radius: 50%;
+        background: radial-gradient(circle, #172033 50%, #166534 100%);
+        box-shadow: 0 0 14px rgba(34, 197, 94, 0.9), inset 0 0 12px rgba(34, 197, 94, 0.35);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        pointer-events: none;
+        z-index: 11;
+        padding: 3px;
+    }
+
+
+    .ml-chart:hover .ml-wheel-center-glow {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 0 25px rgba(34, 197, 94, 1);
+        border-color: #4ade80;
+    }
+
+    .center-title {
+        color: #86efac;
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+
+    .center-sub {
+        color: #ffffff;
+        font-size: 7px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-top: 2px;
+    }
+
+
+</style>
+
+
+<style>
+    /* ==========================================
+           SAFE POSITION CHANGE:
+           Moves graph + bonus wheel left visually only.
+           Does NOT change dashboard/card dimensions.
+           ========================================== */
+    @@media (min-width: 900px) {
+        .ml-panel-body .ml-chart {
+            transform: translateX(-90px) !important;
+        }
+    }
+
+    /* ==========================================
+           BONUS WHEEL:
+           Original size: 150px
+           New size: 188px (about 25% larger)
+           ========================================== */
+    #bonusWheelSvg {
+        width: 188px !important;
+        height: 188px !important;
+    }
+
+    /* Keep the wheel glow visible */
+    .ml-chart:hover #bonusWheelSvg {
+        transform: translate(-50%, -50%) scale(1.04) !important;
+    }
+
+    /* Increase the middle bonus circle proportionally */
+    .ml-wheel-center-glow {
+        width: 70px !important;
+        height: 70px !important;
+        padding: 4px !important;
+    }
+
+    /* Make numbers 1 - 12 larger and clearer */
+    .ml-wheel-text {
+        font-size: 13px !important;
+        stroke-width: 2.5px !important;
+    }
+
+    /* Make centre wording more readable */
+    .center-title {
+        font-size: 11px !important;
+    }
+
+    .center-sub {
+        font-size: 8px !important;
+    }
+</style>
+
+<style>
+    /* Wheel segments now work like clickable buttons */
+    .ml-wheel-slice {
+        cursor: pointer;
+    }
+
+        .ml-wheel-slice:focus {
+            stroke: #bbf7d0 !important;
+            stroke-width: 3px !important;
+            outline: none;
+        }
+
+    /* Customer details popup */
+    .bonus-customer-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(4, 10, 23, 0.78);
+        backdrop-filter: blur(7px);
+    }
+
+        .bonus-customer-modal.is-open {
+            display: flex;
+        }
+
+    .bonus-customer-dialog {
+        position: relative;
+        width: min(470px, 100%);
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+        border: 1px solid rgba(74, 222, 128, 0.65);
+        border-radius: 20px;
+        padding: 28px;
+        color: white;
+        background: radial-gradient(circle at top right, rgba(34, 197, 94, 0.20), transparent 40%), linear-gradient(145deg, #17233f, #0d1528);
+        box-shadow: 0 0 30px rgba(34, 197, 94, 0.35), 0 25px 70px rgba(0, 0, 0, 0.55);
+        animation: bonusPop 0.25s ease;
+    }
+
+    @@keyframes bonusPop {
+        from {
+            opacity: 0;
+            transform: scale(0.90) translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .bonus-customer-close {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 50%;
+        color: white;
+        background: rgba(255, 255, 255, 0.10);
+        cursor: pointer;
+        font-size: 25px;
+        line-height: 28px;
+    }
+
+        .bonus-customer-close:hover {
+            background: #dc2626;
+            border-color: #ef4444;
+        }
+
+    .bonus-customer-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-right: 35px;
+    }
+
+    .bonus-customer-rank {
+        width: 56px;
+        height: 56px;
+        border: 2px solid #86efac;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dcfce7;
+        background: linear-gradient(135deg, #15803d, #166534);
+        box-shadow: 0 0 16px rgba(74, 222, 128, 0.45);
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .bonus-customer-label {
+        margin: 0 0 4px;
+        color: #86efac;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .bonus-customer-header h2 {
+        margin: 0;
+        color: white;
+        font-size: 21px;
+        overflow-wrap: anywhere;
+    }
+
+    .bonus-customer-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 22px 0 18px;
+        padding: 16px;
+        border: 1px solid rgba(74, 222, 128, 0.35);
+        border-radius: 13px;
+        background: rgba(0, 0, 0, 0.18);
+    }
+
+        .bonus-customer-total span {
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .bonus-customer-total strong {
+            color: #86efac;
+            font-size: 24px;
+        }
+
+    .bonus-customer-details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .bonus-detail-item {
+        min-height: 68px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+        .bonus-detail-item span {
+            display: block;
+            color: #94a3b8;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+
+        .bonus-detail-item strong {
+            color: #ffffff;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+    .bonus-contact-section {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+        .bonus-contact-section h3 {
+            margin: 0 0 10px;
+            color: #86efac;
+            font-size: 14px;
+        }
+
+    .bonus-contact-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 10px 0;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+
+        .bonus-contact-row span {
+            flex-shrink: 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .bonus-contact-row strong {
+            color: #ffffff;
+            text-align: right;
+            font-size: 12px;
+            overflow-wrap: anywhere;
+        }
+
+    .bonus-customer-done {
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        color: #052e16;
+        background: linear-gradient(135deg, #86efac, #22c55e);
+        box-shadow: 0 0 18px rgba(34, 197, 94, 0.35);
+        cursor: pointer;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+        .bonus-customer-done:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 24px rgba(34, 197, 94, 0.55);
+        }
+</style>
+
+<section class="ml-cards">
+
+    <div class="ml-card ml-card-green">
+        <div class="ml-card-head">
+            <span>Highest Sales</span>
+            <svg viewBox="0 0 24 24"><path d="M6 18 18 6M18 6h-6M18 6v6" /></svg>
+        </div>
+        <div class="ml-card-value">₦@Model.HighestSale.ToString("N0")</div>
+        <div class="ml-card-icon">🏆</div>
+    </div>
+
+    <div class="ml-card ml-card-red">
+        <div class="ml-card-head">
+            <span>Lowest Sales</span>
+            <svg viewBox="0 0 24 24"><path d="M6 6 18 18M18 18v-6M18 18h-6" /></svg>
+        </div>
+        <div class="ml-card-value">₦@Model.LowestSale.ToString("N0")</div>
+        <div class="ml-card-icon">😟</div>
+    </div>
+
+    <div class="ml-card ml-card-blue">
+        <div class="ml-card-head">
+            <span>Total Sales</span>
+        </div>
+        <div class="ml-card-value">₦@Model.TotalSales.ToString("N0")</div>
+    </div>
+
+    <div class="ml-card ml-card-purple ml-card-coins">
+        <div class="ml-coin-stack">
+            <span class="coin c1"></span>
+            <span class="coin c2"></span>
+            <span class="coin c3"></span>
+            <span class="coin c4"></span>
+        </div>
+    </div>
+
+</section>
+
+<section class="ml-panel">
+    <div class="ml-panel-header">
+        <h2>Recent Sales</h2>
+    </div>
+
+    <div class="ml-panel-body">
+        <div class="ml-sales-list">
+            @foreach (var sale in Model.RecentSales)
+            {
+                var initials = string.Join("", sale.CustomerName.Split(' ', System.StringSplitOptions.RemoveEmptyEntries)
+                    .Select(w => w[0])).ToUpper();
+                var isToday = sale.SaleDate.Date == System.DateTime.Today || sale.SaleDate.Date == new System.DateTime(2026, 7, 15);
+                <div class="ml-sale-row">
+                    <span class="ml-dot"></span>
+                    <div class="ml-avatar">@initials</div>
+                    <div class="ml-sale-name">@sale.CustomerName</div>
+                    <div class="ml-sale-amount">₦@sale.Amount.ToString("N0")</div>
+                    <div class="ml-sale-when">@(isToday ? "Today" : "Yesterday")</div>
+                </div>
+            }
+        </div>
+
+        <div class="ml-chart">
+            <!-- Your original SVG graph is completely preserved -->
+            <svg viewBox="0 0 320 160" preserveAspectRatio="none">
+                <g class="ml-grid">
+                    @for (int i = 0; i <= 4; i++)
+                    {
+                        <line x1="0" y1="@(i * 32)" x2="320" y2="@(i * 32)" />
+                    }
+                    @for (int i = 0; i <= 8; i++)
+                    {
+                        <line x1="@(i * 40)" y1="0" x2="@(i * 40)" y2="160" />
+                    }
+                </g>
+                <polyline class="ml-trend-line" fill="none"
+                          points="0,120 40,90 80,140 120,110 160,95 200,100 240,70 280,40 320,15" />
+                @{
+                    var pts = new[] { new[] { 0, 120 }, new[] { 40, 90 }, new[] { 80, 140 }, new[] { 120, 110 }, new[] { 160, 95 }, new[] { 200, 100 }, new[] { 240, 70 }, new[] { 280, 40 }, new[] { 320, 15 } };
+                }
+                @foreach (var p in pts)
+                {
+                    <circle class="ml-trend-dot" cx="@p[0]" cy="@p[1]" r="3.5" />
+                }
+            </svg>
+
+            <!-- ✨ New Glowing Watermark Pie Chart (Bonus Wheel) Overlay -->
+            <div class="ml-bonus-wheel-overlay">
+                <svg id="bonusWheelSvg" viewBox="0 0 320 160"></svg>
+                <div class="ml-wheel-center-glow" id="wheelCenter">
+                    <div class="center-title">BONUS</div>
+                    <div class="center-sub">TOP 12</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ml-panel-footer">
+        <a href="/Sales/Create" class="ml-go-btn">GO&nbsp;TO&nbsp;SALE</a>
+    </div>
+</section>
+
+<!-- BONUS WHEEL CUSTOMER DETAILS MODAL -->
+<div id="bonusCustomerModal" class="bonus-customer-modal" aria-hidden="true">
+    <div class="bonus-customer-dialog"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="bonusCustomerName">
+
+        <button type="button"
+                id="bonusCustomerClose"
+                class="bonus-customer-close"
+                aria-label="Close customer details">
+            ×
+        </button>
+
+        <div class="bonus-customer-header">
+            <div class="bonus-customer-rank" id="bonusCustomerRank">#1</div>
+
+            <div>
+                <p class="bonus-customer-label">YEARLY BONUS CUSTOMER</p>
+                <h2 id="bonusCustomerName">Customer Name</h2>
+            </div>
+        </div>
+
+        <div class="bonus-customer-total">
+            <span>Total Qualifying Purchase</span>
+            <strong id="bonusCustomerTotal">₦0</strong>
+        </div>
+
+        <div class="bonus-customer-details-grid">
+            <div class="bonus-detail-item">
+                <span>All Purchases</span>
+                <strong id="bonusPurchaseCount">0</strong>
+            </div>
+
+            <div class="bonus-detail-item">
+                <span>Latest Source</span>
+                <strong id="bonusLatestSource">Not available</strong>
+            </div>
+
+            <div class="bonus-detail-item">
+                <span>Shop Purchases</span>
+                <strong id="bonusShopCount">0</strong>
+            </div>
+
+            <div class="bonus-detail-item">
+                <span>Shop Total</span>
+                <strong id="bonusShopTotal">₦0</strong>
+            </div>
+
+            <div class="bonus-detail-item">
+                <span>Online Orders</span>
+                <strong id="bonusOnlineCount">0</strong>
+            </div>
+
+            <div class="bonus-detail-item">
+                <span>Online Total</span>
+                <strong id="bonusOnlineTotal">₦0</strong>
+            </div>
+        </div>
+
+        <div class="bonus-contact-section">
+            <h3>Customer / Order Details</h3>
+
+            <div class="bonus-contact-row">
+                <span>Email</span>
+                <strong id="bonusCustomerEmail">Not available</strong>
+            </div>
+
+            <div class="bonus-contact-row">
+                <span>Address</span>
+                <strong id="bonusCustomerAddress">Not available</strong>
+            </div>
+
+            <div class="bonus-contact-row">
+                <span>City</span>
+                <strong id="bonusCustomerCity">Not available</strong>
+            </div>
+
+            <div class="bonus-contact-row">
+                <span>Payment Method</span>
+                <strong id="bonusCustomerPaymentMethod">Not available</strong>
+            </div>
+
+            <div class="bonus-contact-row">
+                <span>Latest Purchase</span>
+                <strong id="bonusLastPurchaseDate">Not available</strong>
+            </div>
+        </div>
+
+        <button type="button" class="bonus-customer-done" id="bonusCustomerDone">
+            CLOSE DETAILS
+        </button>
+    </div>
+</div>
+
+
+<!-- Trigonometric SVG Builder Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const topCustomers = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopCustomers));
+
+        const svg = document.getElementById("bonusWheelSvg");
+        const center = document.getElementById("wheelCenter");
+
+        const modal = document.getElementById("bonusCustomerModal");
+        const closeButton = document.getElementById("bonusCustomerClose");
+        const doneButton = document.getElementById("bonusCustomerDone");
+
+        if (!svg || !center || !modal) return;
+
+        svg.setAttribute("viewBox", "0 0 200 200");
+
+        const cx = 100;
+        const cy = 100;
+        const outerRadius = 90;
+        const innerRadius = 38;
+
+        function formatMoney(value) {
+            return "₦" + Number(value || 0).toLocaleString("en-NG", {
+                maximumFractionDigits: 0
+            });
+        }
+
+        function formatDate(value) {
+            if (!value) return "Not available";
+
+            const date = new Date(value);
+
+            if (isNaN(date.getTime())) {
+                return "Not available";
+            }
+
+            return date.toLocaleString("en-NG", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+
+        function setCenterDefault() {
+            center.replaceChildren();
+
+            const title = document.createElement("div");
+            title.className = "center-title";
+            title.textContent = "BONUS";
+
+            const sub = document.createElement("div");
+            sub.className = "center-sub";
+            sub.textContent = "TOP 12";
+
+            center.append(title, sub);
+        }
+
+        function setCenterDetails(customer, rank) {
+            center.replaceChildren();
+
+            const customerName = customer.Name || "Empty Slot";
+            const shortName = customerName.length > 9
+                ? customerName.substring(0, 9) + "..."
+                : customerName;
+
+            const rankText = document.createElement("div");
+            rankText.className = "center-title";
+            rankText.textContent = "#" + rank;
+
+            const nameText = document.createElement("div");
+            nameText.style.fontSize = "8px";
+            nameText.style.fontWeight = "800";
+            nameText.style.color = "#ffffff";
+            nameText.style.maxWidth = "64px";
+            nameText.style.overflow = "hidden";
+            nameText.style.textOverflow = "ellipsis";
+            nameText.style.whiteSpace = "nowrap";
+            nameText.style.margin = "3px 0";
+            nameText.textContent = shortName;
+
+            const amountText = document.createElement("div");
+            amountText.style.fontSize = "9px";
+            amountText.style.fontWeight = "800";
+            amountText.style.color = "#86efac";
+            amountText.textContent = formatMoney(customer.TotalSpent);
+
+            center.append(rankText, nameText, amountText);
+        }
+
+        function openCustomerModal(customer, rank) {
+            const hasCustomer = customer && customer.Name && customer.TotalSpent > 0;
+
+            document.getElementById("bonusCustomerRank").textContent = "#" + rank;
+            document.getElementById("bonusCustomerName").textContent =
+                hasCustomer ? customer.Name : "No Customer Yet";
+
+            document.getElementById("bonusCustomerTotal").textContent =
+                hasCustomer ? formatMoney(customer.TotalSpent) : "₦0";
+
+            document.getElementById("bonusPurchaseCount").textContent =
+                hasCustomer ? customer.PurchaseCount : "0";
+
+            document.getElementById("bonusLatestSource").textContent =
+                hasCustomer ? customer.LatestPurchaseSource : "Not available";
+
+            document.getElementById("bonusShopCount").textContent =
+                hasCustomer ? customer.ShopPurchaseCount : "0";
+
+            document.getElementById("bonusShopTotal").textContent =
+                hasCustomer ? formatMoney(customer.ShopPurchaseTotal) : "₦0";
+
+            document.getElementById("bonusOnlineCount").textContent =
+                hasCustomer ? customer.OnlineOrderCount : "0";
+
+            document.getElementById("bonusOnlineTotal").textContent =
+                hasCustomer ? formatMoney(customer.OnlineOrderTotal) : "₦0";
+
+            document.getElementById("bonusCustomerEmail").textContent =
+                hasCustomer ? customer.Email : "Not available";
+
+            document.getElementById("bonusCustomerAddress").textContent =
+                hasCustomer ? customer.ShippingAddress : "Not available";
+
+            document.getElementById("bonusCustomerCity").textContent =
+                hasCustomer ? customer.City : "Not available";
+
+            document.getElementById("bonusCustomerPaymentMethod").textContent =
+                hasCustomer ? customer.PaymentMethod : "Not available";
+
+            document.getElementById("bonusLastPurchaseDate").textContent =
+                hasCustomer ? formatDate(customer.LastPurchaseDate) : "Not available";
+
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeCustomerModal() {
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
+        }
+
+        closeButton.addEventListener("click", closeCustomerModal);
+        doneButton.addEventListener("click", closeCustomerModal);
+
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                closeCustomerModal();
+            }
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && modal.classList.contains("is-open")) {
+                closeCustomerModal();
+            }
+        });
+
+        for (let i = 0; i < 12; i++) {
+            const customer = topCustomers[i] || {
+                Name: "Empty Slot",
+                TotalSpent: 0,
+                PurchaseCount: 0,
+                ShopPurchaseCount: 0,
+                ShopPurchaseTotal: 0,
+                OnlineOrderCount: 0,
+                OnlineOrderTotal: 0,
+                LatestPurchaseSource: "Not available",
+                Email: "Not available",
+                ShippingAddress: "Not available",
+                City: "Not available",
+                PaymentMethod: "Not available",
+                LastPurchaseDate: null
+            };
+
+            const startAngle = (i * 30) - 90;
+            const endAngle = ((i + 1) * 30) - 90;
+
+            const rad1 = (startAngle * Math.PI) / 180;
+            const rad2 = (endAngle * Math.PI) / 180;
+
+            const x1 = cx + outerRadius * Math.cos(rad1);
+            const y1 = cy + outerRadius * Math.sin(rad1);
+            const x2 = cx + outerRadius * Math.cos(rad2);
+            const y2 = cy + outerRadius * Math.sin(rad2);
+
+            const xi1 = cx + innerRadius * Math.cos(rad1);
+            const yi1 = cy + innerRadius * Math.sin(rad1);
+            const xi2 = cx + innerRadius * Math.cos(rad2);
+            const yi2 = cy + innerRadius * Math.sin(rad2);
+
+            const pathData = `
+                M ${xi1} ${yi1}
+                L ${x1} ${y1}
+                A ${outerRadius} ${outerRadius} 0 0 1 ${x2} ${y2}
+                L ${xi2} ${yi2}
+                A ${innerRadius} ${innerRadius} 0 0 0 ${xi1} ${yi1}
+                Z
+            `;
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("class", "ml-wheel-slice");
+
+            /* Makes each SVG portion behave like a button */
+            path.setAttribute("role", "button");
+            path.setAttribute("tabindex", "0");
+            path.setAttribute(
+                "aria-label",
+                `Bonus rank ${i + 1}: ${customer.Name}, ${formatMoney(customer.TotalSpent)}`
+            );
+
+            path.style.fill = i % 2 === 0
+                ? "rgba(12, 17, 30, 0.92)"
+                : "rgba(22, 40, 65, 0.90)";
+
+            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+            title.textContent = `#${i + 1} - ${customer.Name} - ${formatMoney(customer.TotalSpent)}`;
+            path.appendChild(title);
+
+            const labelAngle = startAngle + 15;
+            const labelRadians = (labelAngle * Math.PI) / 180;
+            const labelRadius = innerRadius + ((outerRadius - innerRadius) / 2);
+
+            const labelX = cx + labelRadius * Math.cos(labelRadians);
+            const labelY = cy + labelRadius * Math.sin(labelRadians);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", labelX);
+            text.setAttribute("y", labelY);
+            text.setAttribute("class", "ml-wheel-text");
+            text.textContent = i + 1;
+
+            path.addEventListener("mouseenter", function () {
+                setCenterDetails(customer, i + 1);
+            });
+
+            path.addEventListener("mouseleave", function () {
+                setCenterDefault();
+            });
+
+            path.addEventListener("click", function () {
+                openCustomerModal(customer, i + 1);
+            });
+
+            path.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openCustomerModal(customer, i + 1);
+                }
+            });
+
+            svg.appendChild(path);
+            svg.appendChild(text);
+        }
+
+        setCenterDefault();
+    });
+</script>

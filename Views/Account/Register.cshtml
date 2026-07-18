@@ -1,0 +1,230 @@
+﻿@model IEnumerable<MarketLine.Models.LandingMedia>
+@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>MarketLine - Register</title>
+    <link rel="stylesheet" href="~/css/register.css" />
+</head>
+<body>
+    <div class="register-page">
+        <div class="register-card">
+
+            <!-- LEFT: Registration Form -->
+            <div class="register-left">
+                <div class="register-brand">
+                    <div class="brand-icon">🛒</div>
+                    <div class="brand-text">
+                        <span class="brand-name">MARKET</span>
+                        <span class="brand-sub">LINE</span>
+                    </div>
+                </div>
+
+                <h2>Create Your Account</h2>
+                <p class="register-sub">Join us today and start shopping the best quality<br />products at the best prices.</p>
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert-error">@TempData["Error"]</div>
+                }
+
+                <form asp-action="Register" method="post" class="register-form">
+                    <div class="row-2">
+                        <div class="input-group">
+                            <span class="input-icon">👤</span>
+                            <input type="text" name="FirstName" placeholder="First Name" required />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-icon">👤</span>
+                            <input type="text" name="LastName" placeholder="Last Name" required />
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" name="Email" placeholder="Email Address" required />
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-icon">📞</span>
+                        <input type="tel" name="PhoneNumber" placeholder="Phone Number" required />
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="Password" id="pwd1" placeholder="Password" required />
+                        <span class="input-eye" onclick="togglePwd('pwd1')">👁️</span>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="confirmPassword" id="pwd2" placeholder="Confirm Password" required />
+                        <span class="input-eye" onclick="togglePwd('pwd2')">👁️</span>
+                    </div>
+
+                    <label class="terms">
+                        <input type="checkbox" name="agreeTerms" required />
+                        <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+                    </label>
+
+                    <button type="submit" class="btn-register">👤+ CREATE ACCOUNT</button>
+                </form>
+
+                <div class="or-divider">OR SIGN UP WITH</div>
+
+                <div class="social-buttons">
+                    <button type="button" class="social-btn">G</button>
+                    <button type="button" class="social-btn">f</button>
+                    <button type="button" class="social-btn"></button>
+                </div>
+
+                <p class="signin-link">
+                    Already have an account? <a href="/Account/Login">Sign in here</a>
+                </p>
+            </div>
+
+            <!-- RIGHT: Media Slideshow -->
+            <div class="register-right">
+                @if (!Model.Any())
+                {
+                    <div class="no-media">
+                        <div style="font-size:80px;">🛒</div>
+                        <h2>MARKETLINE SUPERMARKET</h2>
+                        <p>Upload images/videos in Manage Media</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="media-slider">
+                        @foreach (var m in Model)
+                        {
+                            if (m.MediaType == "video")
+                            {
+                                <video class="slide" muted loop playsinline>
+                                    <source src="@m.FilePath" type="video/mp4">
+                                </video>
+                            }
+                            else
+                            {
+                                <img class="slide" src="@m.FilePath" alt="Slide" />
+                            }
+                        }
+                    </div>
+                }
+
+                <!-- Why Shop With Us -->
+                <div class="why-shop">
+                    <h3>WHY SHOP WITH US?</h3>
+                    <div class="reasons">
+                        <div class="reason">
+                            <div class="reason-icon">🏆</div>
+                            <strong>BEST QUALITY</strong>
+                            <p>We offer only the<br />finest products.</p>
+                        </div>
+                        <div class="reason">
+                            <div class="reason-icon">🏷️</div>
+                            <strong>BEST PRICES</strong>
+                            <p>Competitive prices<br />you can trust.</p>
+                        </div>
+                        <div class="reason">
+                            <div class="reason-icon">🛡️</div>
+                            <strong>SECURE PAYMENT</strong>
+                            <p>Your payments are<br />safe and secure.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Features -->
+        <div class="bottom-features">
+            <div class="bfeature">
+                <div class="bfeature-icon">🏅</div>
+                <div>
+                    <strong>100% AUTHENTIC</strong>
+                    <p>We sell only genuine products.</p>
+                </div>
+            </div>
+            <div class="bfeature">
+                <div class="bfeature-icon">👍</div>
+                <div>
+                    <strong>CUSTOMER SATISFACTION</strong>
+                    <p>Your satisfaction is our priority.</p>
+                </div>
+            </div>
+            <div class="bfeature">
+                <div class="bfeature-icon">🚚</div>
+                <div>
+                    <strong>FAST & RELIABLE DELIVERY</strong>
+                    <p>We deliver to your doorstep.</p>
+                </div>
+            </div>
+            <div class="bfeature">
+                <div class="bfeature-icon">🔄</div>
+                <div>
+                    <strong>EASY RETURNS</strong>
+                    <p>Hassle-free return policy.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            function togglePwd(id) {
+                const pwd = document.getElementById(id);
+                pwd.type = pwd.type === 'password' ? 'text' : 'password';
+            }
+
+            // ===== SLIDESHOW =====
+            const slides = document.querySelectorAll('.slide');
+            let current = 0;
+            let userInteracted = false;
+
+            if (slides.length > 0) {
+                slides[0].classList.add('active');
+                if (slides[0].tagName === 'VIDEO') {
+                    slides[0].muted = true;
+                    slides[0].play();
+                }
+
+                if (slides.length > 1) {
+                    setInterval(() => {
+                        const prev = slides[current];
+                        prev.classList.remove('active');
+                        if (prev.tagName === 'VIDEO') {
+                            prev.pause();
+                            prev.currentTime = 0;
+                        }
+
+                        current = (current + 1) % slides.length;
+
+                        const next = slides[current];
+                        next.classList.add('active');
+                        if (next.tagName === 'VIDEO') {
+                            next.muted = !userInteracted;
+                            next.play();
+                        }
+                    }, 5000);
+                }
+            }
+
+            // Auto unmute after any user interaction
+            function enableSound() {
+                userInteracted = true;
+                document.querySelectorAll('video.slide').forEach(v => v.muted = false);
+                document.removeEventListener('click', enableSound);
+                document.removeEventListener('keydown', enableSound);
+                document.removeEventListener('mousemove', enableSound);
+                document.removeEventListener('scroll', enableSound);
+            }
+            document.addEventListener('click', enableSound);
+            document.addEventListener('keydown', enableSound);
+            document.addEventListener('mousemove', enableSound);
+            document.addEventListener('scroll', enableSound);
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+# ==========================================================
+# .NET build output
+# ==========================================================
+bin/
+obj/
+
+# Visual Studio / Rider / VS Code local settings
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ==========================================================
+# Sensitive configuration
+# ==========================================================
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+
+# Environment files / secrets
+.env
+.env.*
+secrets.json
+*.secret.json
+
+# ==========================================================
+# Local database files
+# ==========================================================
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================================================
+# Runtime-uploaded files
+# Do not upload customers' images/videos to GitHub.
+# The .gitkeep file preserves the empty folder.
+# ==========================================================
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

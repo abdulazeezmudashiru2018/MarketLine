@@ -1,0 +1,402 @@
+﻿/* ==========================================================================
+   Customers Record page (/Customers)
+   ========================================================================== */
+
+.customers-header {
+    background: #fff;
+    border-radius: 18px;
+    padding: 26px 24px;
+    text-align: center;
+    color: #1c2140;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+    .customers-header h1 {
+        margin: 0;
+        font-size: 2.1rem;
+        line-height: 1.1;
+    }
+
+.customers-brand {
+    color: #14257a;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.customers-subbrand {
+    margin: 2px 0 10px;
+    color: #c62828;
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+}
+
+.customers-tagline {
+    margin: 0 auto;
+    color: #33364f;
+    font-size: 0.95rem;
+    max-width: 620px;
+}
+
+/* ---------- Glowing search bar ---------- */
+.customers-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(47, 111, 255, 0.06);
+    border: 1px solid rgba(47, 111, 255, 0.3);
+    border-radius: 14px;
+    padding: 14px 18px;
+    box-shadow: 0 0 0 4px rgba(47, 111, 255, 0.08), 0 6px 22px -6px rgba(47, 111, 255, 0.55);
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
+
+    .customers-search-bar:focus-within {
+        border-color: #2f6fff;
+        box-shadow: 0 0 0 5px rgba(47, 111, 255, 0.16), 0 8px 26px -4px rgba(47, 111, 255, 0.7);
+    }
+
+    .customers-search-bar svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        fill: none;
+        stroke: #8fb0ff;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .customers-search-bar input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 1rem;
+        color: var(--text-light);
+    }
+
+        .customers-search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+
+/* ---------- Customer list ---------- */
+.customers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.customers-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px 0;
+}
+
+.customer-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(47, 111, 255, 0.04), 0 6px 16px -8px rgba(0,0,0,0.5);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+    .customer-card:hover {
+        transform: translateY(-1px);
+        border-color: rgba(47, 111, 255, 0.4);
+        box-shadow: 0 0 0 3px rgba(47, 111, 255, 0.12), 0 10px 22px -8px rgba(0,0,0,0.55);
+    }
+
+.customer-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1c2140;
+    background: linear-gradient(160deg, #ffe08a, #ff9a6a);
+    border: 2px solid rgba(255,255,255,0.35);
+}
+
+.customer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.customer-name {
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: var(--text-light);
+}
+
+.customer-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.customer-chevron {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: var(--text-muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ---------- Receipts panel (slide-out) ---------- */
+.receipts-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 12, 26, 0.55);
+    z-index: 200;
+}
+
+    .receipts-overlay.open {
+        display: block;
+    }
+
+.receipts-panel {
+    position: fixed;
+    top: 0;
+    right: -420px;
+    width: 400px;
+    max-width: 92vw;
+    height: 100%;
+    background: #10142b;
+    color: var(--text-light);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    transition: right .28s ease;
+    display: flex;
+    flex-direction: column;
+    z-index: 201;
+    border-left: 1px solid var(--glass-border);
+}
+
+.receipts-overlay.open .receipts-panel {
+    right: 0;
+}
+
+.receipts-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+    .receipts-panel-header h3 {
+        margin: 0;
+        font-size: 1.05rem;
+    }
+
+.receipts-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.receipts-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px 10px;
+    font-size: 0.9rem;
+}
+
+.receipt-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.receipt-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    gap: 10px;
+}
+
+.receipt-card-date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.receipt-card-total {
+    font-weight: 800;
+    color: var(--gold);
+    font-size: 1rem;
+}
+
+.receipt-card-items {
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+    .receipt-card-items li {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.84rem;
+        color: var(--text-light);
+    }
+
+        .receipt-card-items li span {
+            color: var(--text-muted);
+            margin-left: auto;
+            margin-right: 8px;
+        }
+
+.receipt-image-link {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: #8fb0ff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+    .receipt-image-link:hover {
+        text-decoration: underline;
+    }
+
+@media (max-width: 560px) {
+    .customers-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .customers-subbrand {
+        font-size: 1.05rem;
+    }
+
+    .customer-meta {
+        flex-direction: column;
+        gap: 2px;
+    }
+}
+
+
+/* ==========================================================
+   RECEIPT DRAWER - HIGH CONTRAST / READABLE RECEIPTS
+   Fixes faded receipt text on light receipt cards.
+   ========================================================== */
+
+/* Keep the right drawer dark and clear */
+.receipts-panel {
+    background: #10142b !important;
+    color: #ffffff !important;
+}
+
+/* Receipt cards should be bright white */
+.receipt-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22) !important;
+    color: #172033 !important;
+}
+
+/* Receipt date */
+.receipt-card-date {
+    color: #64748b !important;
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+}
+
+/* Total receipt amount */
+.receipt-card-total {
+    color: #d97706 !important;
+    font-weight: 900 !important;
+    font-size: 1rem !important;
+    white-space: nowrap;
+}
+
+/* Receipt purchased items */
+.receipt-card-items li {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    font-size: 0.84rem !important;
+    padding: 3px 0;
+}
+
+    /* Product quantity: x2, x4, x5 */
+    .receipt-card-items li span {
+        color: #475569 !important;
+        font-weight: 700 !important;
+        margin-left: auto;
+        margin-right: 8px;
+        white-space: nowrap;
+    }
+
+    /* Item amount */
+    .receipt-card-items li strong {
+        color: #111827 !important;
+        font-weight: 800 !important;
+        white-space: nowrap;
+    }
+
+/* Receipt image link */
+.receipt-image-link {
+    color: #2563eb !important;
+    font-weight: 800 !important;
+    margin-top: 7px;
+}
+
+    .receipt-image-link:hover {
+        color: #1d4ed8 !important;
+        text-decoration: underline;
+    }
+
+/* Drawer title/customer name */
+.receipts-panel-header h3 {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+/* Close button visibility */
+.drawer-close-btn {
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #111827;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+}
+
+    .drawer-close-btn:hover {
+        background: #ef4444;
+        border-color: #ef4444;
+        color: #ffffff;
+    }
+
+/* Empty/loading message inside drawer */
+.receipts-empty {
+    color: #cbd5e1 !important;
+    font-weight: 600;
+}

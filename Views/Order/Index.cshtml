@@ -1,0 +1,323 @@
+﻿@model IEnumerable<MarketLine.Models.Product>
+@{
+    ViewData["Title"] = "Order";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>MarketLine - Order</title>
+    <link rel="stylesheet" href="~/css/order.css" />
+</head>
+<body class="order-body">
+
+    <div class="glow-bg">
+        <div class="glow-orb orb1"></div>
+        <div class="glow-orb orb2"></div>
+        <div class="glow-orb orb3"></div>
+        <div class="glow-orb orb4"></div>
+    </div>
+
+    <div class="order-container">
+
+        <!-- LEFT: Products -->
+        <div class="products-panel">
+            <div class="panel-header header-orange">
+                <div class="header-icon">📦</div>
+                <div>
+                    <h2>Products</h2>
+                    <p>@Model.Count() items available</p>
+                </div>
+            </div>
+
+            <div class="products-grid">
+                @foreach (var p in Model)
+                {
+                    <div class="product-card">
+                        <div class="product-top">
+                            @if (!string.IsNullOrEmpty(p.ImagePath))
+                            {
+                                <img src="@p.ImagePath" alt="@p.Name" class="product-img" />
+                            }
+                            else
+                            {
+                                <div class="product-icon">📦</div>
+                            }
+                            @if (!string.IsNullOrEmpty(p.Barcode))
+                            {
+                                <span class="badge">@p.Barcode</span>
+                            }
+                        </div>
+                        <h3>@p.Name</h3>
+                        <div class="product-bottom">
+                            <span class="price">₦@p.Price.ToString("N0")</span>
+                            <button type="button" class="btn-add"
+                                    data-id="@p.Id"
+                                    data-name="@p.Name"
+                                    data-price="@p.Price">
+                                + Add
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- RIGHT: Cart & Checkout -->
+        <div class="cart-panel">
+            <div class="panel-header header-blue">
+                <div class="header-icon">🛒</div>
+                <div>
+                    <h2>Cart & Checkout</h2>
+                    <p><span id="cartCount">0</span> items in cart</p>
+                </div>
+            </div>
+
+            <div class="checkout-form">
+                <div id="cartItems" class="cart-empty">
+                    <div class="empty-icon">🛒</div>
+                    <p>Your cart is empty</p>
+                    <small>Add products to get started</small>
+                </div>
+
+                <div class="section-title">📍 Shipping Details</div>
+                <input id="fullName" type="text" placeholder="Full Name *" class="form-input" />
+                <input id="email" type="email" placeholder="Email Address *" class="form-input" />
+                <input id="address" type="text" placeholder="Shipping Address *" class="form-input" />
+                <div class="row-2">
+                    <input id="city" type="text" placeholder="City *" class="form-input" />
+                    <input id="zip" type="text" placeholder="ZIP Code *" class="form-input" />
+                </div>
+
+                <div class="section-title">💳 Payment Method</div>
+                <label class="pay-option selected">
+                    <input type="radio" name="payment" value="Card" checked />
+                    <span>💳 Credit/Debit Card</span>
+                </label>
+                <label class="pay-option">
+                    <input type="radio" name="payment" value="BankTransfer" />
+                    <span>🏦 Bank Transfer</span>
+                </label>
+
+                <button type="button" class="btn-place-order" id="placeOrderBtn" disabled>
+                    🛒 Place Order — ₦<span id="totalDisplay">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BANK TRANSFER MODAL -->
+    <div id="bankModal" class="modal">
+        <div class="modal-content">
+            <h2>🏦 Bank Transfer Details</h2>
+            <p style="color:#6b7280;margin-bottom:15px;">Please transfer to the account below:</p>
+            <div class="account-details">
+                <p><strong>Account Name:</strong> YAH-WAKEEL STORE</p>
+                <p><strong>Account Number:</strong> 5650601808</p>
+                <p><strong>Bank:</strong> MONIEPOINT</p>
+                <p><strong>Amount:</strong> ₦<span id="bankAmount">0</span></p>
+            </div>
+            <button id="confirmTransfer" class="btn-confirm">✅ I Have Made The Transfer</button>
+            <button onclick="closeModal('bankModal')" class="btn-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- CARD PAYMENT MODAL -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content">
+            <h2>💳 Card Payment</h2>
+            <div class="card-form">
+                <label>Card Number</label>
+                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" />
+
+                <div class="row-2" style="margin-top:10px;">
+                    <div>
+                        <label>Expiry (MM/YY)</label>
+                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" />
+                    </div>
+                    <div>
+                        <label>CVC</label>
+                        <input type="text" id="cvc" placeholder="123" maxlength="4" />
+                    </div>
+                </div>
+
+                <p style="margin-top:15px;color:#6b7280;font-size:13px;">
+                    💰 Payment goes to: <strong>YAH-WAKEEL STORE (Moniepoint)</strong>
+                </p>
+
+                <button id="payNowBtn" class="btn-confirm" style="margin-top:15px;">
+                    Pay ₦<span id="modalTotal">0</span>
+                </button>
+                <button onclick="closeModal('cardModal')" class="btn-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div id="successModal" class="modal">
+        <div class="modal-content" style="text-align:center;">
+            <div style="font-size:60px;">✅</div>
+            <h2>Order Placed Successfully!</h2>
+            <p style="color:#6b7280;margin:10px 0;">Thank you for your order. You'll receive a confirmation soon.</p>
+            <button onclick="closeModal('successModal');location.reload();" class="btn-confirm">Continue Shopping</button>
+        </div>
+    </div>
+
+    <script>
+            // ===== CART STATE =====
+            let cart = [];
+
+            const cartItemsEl = document.getElementById('cartItems');
+            const cartCountEl = document.getElementById('cartCount');
+            const totalDisplay = document.getElementById('totalDisplay');
+            const placeBtn = document.getElementById('placeOrderBtn');
+
+            // ===== ADD TO CART =====
+            document.querySelectorAll('.btn-add').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const name = btn.dataset.name;
+                    const price = parseFloat(btn.dataset.price);
+
+                    const existing = cart.find(x => x.id === id);
+                    if (existing) {
+                        existing.qty++;
+                    } else {
+                        cart.push({ id: id, name: name, price: price, qty: 1 });
+                    }
+                    render();
+                });
+            });
+
+            // ===== RENDER CART =====
+            function render() {
+                const count = cart.reduce((s, i) => s + i.qty, 0);
+                const total = cart.reduce((s, i) => s + i.qty * i.price, 0);
+
+                cartCountEl.textContent = count;
+                totalDisplay.textContent = total.toLocaleString('en-NG');
+                placeBtn.disabled = count === 0;
+
+                if (cart.length === 0) {
+                    cartItemsEl.className = 'cart-empty';
+                    cartItemsEl.innerHTML = `
+                        <div class="empty-icon">🛒</div>
+                        <p>Your cart is empty</p>
+                        <small>Add products to get started</small>`;
+                } else {
+                    cartItemsEl.className = 'cart-list';
+
+                    cartItemsEl.innerHTML = cart.map(i => `
+                        <div class="cart-item">
+                            <span>${i.name} × ${i.qty}</span>
+                            <span>₦${(i.price * i.qty).toLocaleString('en-NG')}</span>
+                            <button class="remove-btn" data-id="${i.id}">✕</button>
+                        </div>`).join('');
+                                    requestAnimationFrame(() => {
+                cartItemsEl.scrollTop = cartItemsEl.scrollHeight;
+            });
+                    document.querySelectorAll('.remove-btn').forEach(b => {
+
+
+                        b.addEventListener('click', () => {
+                            cart = cart.filter(x => x.id !== b.dataset.id);
+                            render();
+                        });
+                    });
+                }
+            }
+
+            // ===== PAYMENT OPTION HIGHLIGHT =====
+            document.querySelectorAll('.pay-option input').forEach(r => {
+                r.addEventListener('change', () => {
+                    document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+                    r.closest('.pay-option').classList.add('selected');
+                });
+            });
+
+            // ===== PLACE ORDER BUTTON =====
+            placeBtn.addEventListener('click', () => {
+                // Validate shipping fields
+                const fullName = document.getElementById('fullName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const address = document.getElementById('address').value.trim();
+                const city = document.getElementById('city').value.trim();
+                const zip = document.getElementById('zip').value.trim();
+
+                if (!fullName || !email || !address || !city || !zip) {
+                    alert('⚠️ Please fill in all shipping details.');
+                    return;
+                }
+
+                const method = document.querySelector('input[name="payment"]:checked').value;
+                const total = cart.reduce((s, i) => s + i.qty * i.price, 0);
+            if (method === 'BankTransfer') {
+                document.getElementById('bankAmount').textContent = total.toLocaleString('en-NG');
+                document.getElementById('bankModal').classList.add('show');
+            } else {
+                document.getElementById('modalTotal').textContent = total.toLocaleString('en-NG');
+                document.getElementById('cardModal').classList.add('show');
+            }
+            });
+
+                       function closeModal(id) {
+                document.getElementById(id).classList.remove('show');
+            }
+
+            // ===== CONFIRM BANK TRANSFER =====
+            document.getElementById('confirmTransfer').addEventListener('click', () => {
+                submitOrder('BankTransfer');
+            });
+
+            // ===== CONFIRM CARD PAYMENT =====
+            document.getElementById('payNowBtn').addEventListener('click', () => {
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const expiry = document.getElementById('expiry').value.trim();
+                const cvc = document.getElementById('cvc').value.trim();
+
+                if (cardNumber.length < 12 || !expiry || !cvc) {
+                    alert('⚠️ Please enter valid card details.');
+                    return;
+                }
+                submitOrder('Card');
+            });
+
+            // ===== SEND ORDER TO SERVER =====
+            async function submitOrder(method) {
+                const total = cart.reduce((s, i) => s + i.qty * i.price, 0);
+
+                const payload = {
+                    fullName: document.getElementById('fullName').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    shippingAddress: document.getElementById('address').value.trim(),
+                    city: document.getElementById('city').value.trim(),
+                    zipCode: document.getElementById('zip').value.trim(),
+                    paymentMethod: method,
+                    total: total,
+                    cart: cart
+                };
+
+                try {
+                    const res = await fetch('/Order/PlaceOrder', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        closeModal(method === 'BankTransfer' ? 'bankModal' : 'cardModal');
+                       document.getElementById('successModal').classList.add('show');
+                        cart = [];
+                        render();
+                    } else {
+                        alert('❌ Failed to place order. Try again.');
+                    }
+                } catch (err) {
+                    alert('❌ Error: ' + err.message);
+                }
+            }
+    </script>
+</body>
+</html>

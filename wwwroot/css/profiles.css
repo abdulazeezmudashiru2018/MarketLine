@@ -1,0 +1,214 @@
+﻿.profiles-container {
+    padding: 40px 20px;
+    min-height: calc(100vh - 80px);
+    background: radial-gradient(circle at top right, rgba(34, 197, 94, 0.05), transparent), radial-gradient(circle at bottom left, rgba(22, 163, 74, 0.05), transparent);
+}
+
+.profiles-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+    .profiles-header h1 {
+        font-size: 32px;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+
+    .profiles-header p {
+        color: #6b7280;
+        font-size: 16px;
+    }
+
+.profiles-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 24px;
+    padding: 30px;
+    position: relative;
+    border: 1px solid #e5e7eb;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+    .profile-card:hover {
+        transform: translateY(-10px);
+        border-color: #22c55e;
+        box-shadow: 0 20px 40px rgba(34, 197, 94, 0.15);
+    }
+
+.card-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.03) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.profile-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.avatar {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #15803d, #22c55e);
+    color: white;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    box-shadow: 0 10px 20px rgba(21, 128, 61, 0.3);
+}
+
+.user-id {
+    font-family: monospace;
+    background: #f3f4f6;
+    padding: 5px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 700;
+}
+
+.profile-info h2 {
+    font-size: 22px;
+    color: #111827;
+    margin-bottom: 5px;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #dcfce7;
+    color: #166534;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 25px;
+}
+
+.info-item {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+    .info-item .icon {
+        font-size: 20px;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 11px;
+        color: #9ca3af;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .info-item p {
+        color: #374151;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+.card-footer {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #059669;
+    font-weight: 600;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #10b981;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+}
+
+/* Empty Slot Styling */
+.empty-slot {
+    border: 2px dashed #d1d5db;
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+}
+
+.empty-content {
+    text-align: center;
+    color: #9ca3af;
+}
+
+.empty-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.btn-fill {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: #e5e7eb;
+    color: #4b5563;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+    .btn-fill:hover {
+        background: #d1d5db;
+        color: #111827;
+    }
+
+@media (max-width: 992px) {
+    .profiles-grid {
+        grid-template-columns: 1fr;
+    }
+}

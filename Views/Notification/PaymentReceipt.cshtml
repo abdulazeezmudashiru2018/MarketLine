@@ -1,0 +1,36 @@
+﻿@model MarketLine.Models.CustomerOrder
+@{
+    ViewData["Title"] = "Payment Receipt";
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/notifications.css" />
+
+<div class="details-page">
+    <div class="receipt-card">
+        <div class="receipt-header">
+            <div class="receipt-check">✅</div>
+            <h1>Payment Receipt</h1>
+            <p class="receipt-sub">Transaction #@Model.Id</p>
+        </div>
+
+        <div class="receipt-body">
+            <div class="receipt-row"><span>Customer:</span><strong>@Model.FullName</strong></div>
+            <div class="receipt-row"><span>Email:</span><strong>@Model.Email</strong></div>
+            <div class="receipt-row"><span>Payment Method:</span><strong>@Model.PaymentMethod</strong></div>
+            <div class="receipt-row"><span>Date:</span><strong>@Model.CreatedAt.ToString("MMM dd, yyyy - HH:mm")</strong></div>
+            <div class="receipt-row"><span>Status:</span><strong style="color:#10b981;">@Model.Status</strong></div>
+            <div class="receipt-row"><span>Received By:</span><strong>YAH-WAKEEL STORE</strong></div>
+
+            <div class="receipt-total">
+                <span>Amount Paid</span>
+                <strong>₦@Model.Total.ToString("N2")</strong>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            <p>Thank you for your payment! 🙏</p>
+            <a href="/Dashboard" class="btn-back">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>

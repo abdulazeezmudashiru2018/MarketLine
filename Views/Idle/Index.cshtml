@@ -1,0 +1,257 @@
+﻿@model IEnumerable<MarketLine.Models.LandingMedia>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "MarketLine Idle Display";
+    Layout = null;
+
+    var mediaItems = Model.ToList();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MarketLine - Welcome</title>
+    <link rel="stylesheet" href="~/css/idle.css" asp-append-version="true" />
+</head>
+
+<body class="idle-body">
+    <main class="idle-screen">
+
+        <!-- Background image/video slideshow -->
+        <section class="idle-media-stage">
+
+            @if (mediaItems.Count == 0)
+            {
+                <div class="idle-empty-media">
+                    <div class="idle-empty-icon">🛒</div>
+                    <h1>MARKETLINE</h1>
+                    <p>Quality products. Better shopping. Every day.</p>
+                </div>
+            }
+            else
+            {
+                @for (var i = 0; i < mediaItems.Count; i++)
+                {
+                    var item = mediaItems[i];
+
+                    if (item.MediaType == "video")
+                    {
+                        <video class="idle-slide @(i == 0 ? "active" : "")"
+                               muted
+                               loop
+                               playsinline
+                               preload="metadata">
+                            <source src="@item.FilePath" />
+                        </video>
+                    }
+                    else
+                    {
+                        <img class="idle-slide @(i == 0 ? "active" : "")"
+                             src="@item.FilePath"
+                             alt="MarketLine promotion" />
+                    }
+                }
+            }
+
+            <!-- Fine dark overlay for text readability -->
+            <div class="idle-overlay"></div>
+
+            <!-- Decorative glow -->
+            <div class="idle-glow idle-glow-one"></div>
+            <div class="idle-glow idle-glow-two"></div>
+
+            <!-- Brand -->
+            <header class="idle-header">
+                <div class="idle-brand">
+                    <div class="idle-brand-icon">🛒</div>
+
+                    <div class="idle-brand-text">
+                        <span class="idle-brand-market">MARKET</span>
+                        <span class="idle-brand-line">LINE</span>
+                    </div>
+                </div>
+
+                <div class="idle-status">
+                    <span class="idle-status-dot"></span>
+                    MARKETLINE IS READY
+                </div>
+            </header>
+
+            <!-- Main screen text -->
+            <section class="idle-content">
+                <div class="idle-tag">WELCOME TO MARKETLINE</div>
+
+                <h1 class="idle-title">
+                    Every Purchase<br />
+                    <span>Matters.</span>
+                </h1>
+
+                <p class="idle-description">
+                    Great products, fair prices, and memorable shopping experiences —
+                    made for every customer.
+                </p>
+
+                <div class="idle-quote-card">
+                    <span class="idle-quote-mark">“</span>
+
+                    <p id="idleQuote">
+                        Quality is remembered long after the price is forgotten.
+                    </p>
+
+                    <span class="idle-quote-line"></span>
+
+                    <small id="idleQuoteAuthor">MARKETLINE PROMISE</small>
+                </div>
+
+                <!-- Required Button -->
+                <a href="/Dashboard" class="idle-dashboard-btn">
+                    <span>🏠</span>
+                    GO TO DASHBOARD
+                    <span class="idle-btn-arrow">→</span>
+                </a>
+            </section>
+
+            <!-- Right Bottom Benefits -->
+            <aside class="idle-benefits">
+                <div class="idle-benefit">
+                    <div class="idle-benefit-icon">✨</div>
+                    <div>
+                        <strong>QUALITY</strong>
+                        <span>Trusted products</span>
+                    </div>
+                </div>
+
+                <div class="idle-benefit">
+                    <div class="idle-benefit-icon">🏷️</div>
+                    <div>
+                        <strong>BEST PRICES</strong>
+                        <span>Great value daily</span>
+                    </div>
+                </div>
+
+                <div class="idle-benefit">
+                    <div class="idle-benefit-icon">🛡️</div>
+                    <div>
+                        <strong>SECURE</strong>
+                        <span>Safe transactions</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Bottom clock -->
+            <footer class="idle-footer">
+                <div>
+                    <span class="idle-footer-label">MARKETLINE CASHIER SYSTEM</span>
+                    <span class="idle-footer-divider"></span>
+                    <span>Ready when you are</span>
+                </div>
+
+                <div class="idle-clock" id="idleClock"></div>
+            </footer>
+
+        </section>
+    </main>
+
+    <script>
+            // ===== MEDIA SLIDER =====
+            const slides = Array.from(document.querySelectorAll('.idle-slide'));
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                if (slides.length === 0) return;
+
+                slides.forEach((slide, slideIndex) => {
+                    const isCurrentSlide = slideIndex === index;
+
+                    slide.classList.toggle('active', isCurrentSlide);
+
+                    if (slide.tagName === 'VIDEO') {
+                        if (isCurrentSlide) {
+                            // Browser allows autoplay when video is muted.
+                            slide.muted = true;
+
+                            slide.play().catch(() => {
+                                // Browser may delay playback until media is ready.
+                            });
+                        } else {
+                            slide.pause();
+                            slide.currentTime = 0;
+                        }
+                    }
+                });
+            }
+
+            if (slides.length > 0) {
+                showSlide(0);
+
+                if (slides.length > 1) {
+                    setInterval(() => {
+                        currentSlide = (currentSlide + 1) % slides.length;
+                        showSlide(currentSlide);
+                    }, 5000);
+                }
+            }
+
+            // ===== ROTATING QUOTES =====
+            const quotes = [
+                {
+                    text: "Quality is remembered long after the price is forgotten.",
+                    author: "MARKETLINE PROMISE"
+                },
+                {
+                    text: "A satisfied customer is the heart of every successful store.",
+                    author: "CUSTOMER FIRST"
+                },
+                {
+                    text: "Good service is not an expense; it is an investment in trust.",
+                    author: "MARKETLINE VALUE"
+                },
+                {
+                    text: "Great shopping begins with great choices.",
+                    author: "SHOP SMART"
+                }
+            ];
+
+            let quoteIndex = 0;
+
+            setInterval(() => {
+                quoteIndex = (quoteIndex + 1) % quotes.length;
+
+                const quote = document.getElementById('idleQuote');
+                const author = document.getElementById('idleQuoteAuthor');
+
+                quote.style.opacity = "0";
+                author.style.opacity = "0";
+
+                setTimeout(() => {
+                    quote.textContent = quotes[quoteIndex].text;
+                    author.textContent = quotes[quoteIndex].author;
+
+                    quote.style.opacity = "1";
+                    author.style.opacity = "1";
+                }, 250);
+            }, 7000);
+
+            // ===== LIVE DATE/TIME =====
+            function updateClock() {
+                const now = new Date();
+
+                document.getElementById('idleClock').textContent =
+                    now.toLocaleString('en-NG', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+            }
+
+            updateClock();
+            setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>

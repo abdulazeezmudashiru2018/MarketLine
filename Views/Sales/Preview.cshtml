@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Preview Sale";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/preview.css" asp-append-version="true" />
+}
+
+@Html.AntiForgeryToken()
+
+<div class="preview-wrap">
+
+    <div class="receipt-shell" id="receiptRoot">
+        <p class="receipt-loading" id="receiptLoading">Loading receipt…</p>
+        <!-- Receipt content is built here by preview.js from the data
+             handed over by the Sales page (sessionStorage). -->
+    </div>
+
+    <div class="preview-actions no-print">
+        <button type="button" class="preview-btn preview-btn-back" id="btnBack">
+            <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
+            Back
+        </button>
+        <button type="button" class="preview-btn preview-btn-save" id="btnSaveReceipt">
+            <svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" /><path d="M8 4v5h7V4M8 13h8v7H8v-7Z" /></svg>
+            Save
+        </button>
+        <button type="button" class="preview-btn preview-btn-print" id="btnPrint">
+            <svg viewBox="0 0 24 24"><path d="M6 9V4h12v5" /><path d="M6 18H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2" /><rect x="6" y="14" width="12" height="7" /></svg>
+            Print
+        </button>
+    </div>
+
+    <p class="preview-msg no-print" id="previewMsg"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+@section Scripts {
+    <script src="~/js/preview.js" asp-append-version="true"></script>
+}

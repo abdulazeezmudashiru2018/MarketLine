@@ -1,0 +1,62 @@
+﻿@model MarketLine.Models.CustomerOrder
+@{
+    ViewData["Title"] = "Order Details";
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/notifications.css" />
+
+<div class="details-page">
+    <div class="details-card">
+        <div class="details-header">
+            <h1>📦 Order #@Model.Id</h1>
+            <span class="status-pill status-@Model.Status.Replace(" ", "").ToLower()">@Model.Status</span>
+        </div>
+
+        <div class="details-section">
+            <h3>👤 Customer Information</h3>
+            <p><strong>Name:</strong> @Model.FullName</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Address:</strong> @Model.ShippingAddress</p>
+            <p><strong>City:</strong> @Model.City</p>
+            <p><strong>ZIP:</strong> @Model.ZipCode</p>
+        </div>
+
+        <div class="details-section">
+            <h3>🛒 Items Ordered</h3>
+            <table class="details-table">
+                <thead>
+                    <tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+            </table>
+        </div>
+
+        <div class="details-section">
+            <h3>💳 Payment</h3>
+            <p><strong>Method:</strong> @Model.PaymentMethod</p>
+            <p><strong>Date:</strong> @Model.CreatedAt.ToString("MMMM dd, yyyy - HH:mm")</p>
+            <p class="total-amount">Total: ₦@Model.Total.ToString("N2")</p>
+        </div>
+
+        <a href="/Dashboard" class="btn-back">← Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    const rawJson = '@Html.Raw(Model.CartItemsJson.Replace("'", "\\'"))';
+    let items = [];
+    try { items = JSON.parse(rawJson); } catch(e) { console.error(e); }
+
+    const tbody = document.getElementById('itemsBody');
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:20px;">No items found</td></tr>';
+    } else {
+        tbody.innerHTML = items.map(i => {
+            const name = i.name || i.Name || 'Unknown';
+            const qty = i.qty || i.Qty || 0;
+            const price = i.price || i.Price || 0;
+            return `<tr><td>${name}</td><td>${qty}</td><td>₦${Number(price).toLocaleString('en-NG')}</td><td>₦${Number(price*qty).toLocaleString('en-NG')}</td></tr>`;
+        }).join('');
+    }
+</script>

@@ -1,0 +1,70 @@
+﻿@model List<MarketLine.Models.Customer>
+@using System
+@using System.Linq
+@{
+    ViewData["Title"] = "Customers Record";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/customers.css" asp-append-version="true" />
+}
+
+<section class="customers-header">
+    <h1><span class="customers-brand">PRESTIGE</span></h1>
+    <h2 class="customers-subbrand">SOFT DRINK STORE</h2>
+    <p class="customers-tagline">
+        Dealer in all kinds of soft drinks such as Coke, Fearless, Malt, Viju Milk, Yogurt etc.
+        Both Wholesale and Retail.
+    </p>
+</section>
+
+<section class="customers-search-bar">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+    <input type="text" id="customerSearchInput" placeholder="Search by customer name or phone number…" autocomplete="off" />
+</section>
+
+<section class="customers-list" id="customersList">
+    @if (!Model.Any())
+    {
+        <p class="customers-empty" id="customersEmptyMsg">No customers yet — they'll show up here after their first sale.</p>
+    }
+    @foreach (var customer in Model)
+    {
+        var initials = string.Join("", customer.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(w => w[0])).ToUpper();
+        <div class="customer-card" data-id="@customer.Id" data-name="@customer.Name.ToLower()" data-phone="@(customer.Phone ?? "")">
+            <div class="customer-avatar">@initials</div>
+            <div class="customer-info">
+                <div class="customer-name">@customer.Name</div>
+                <div class="customer-meta">
+                    @if (!string.IsNullOrWhiteSpace(customer.Phone))
+                    {
+                        <span>@customer.Phone</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(customer.Address))
+                    {
+                        <span>@customer.Address</span>
+                    }
+                </div>
+            </div>
+            <svg class="customer-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
+        </div>
+    }
+    <p class="customers-empty" id="customersNoMatch" style="display:none;">No customers match your search.</p>
+</section>
+
+<!-- Receipts panel -->
+<div class="receipts-overlay" id="receiptsOverlay">
+    <aside class="receipts-panel">
+        <div class="receipts-panel-header">
+            <h3 id="receiptsCustomerName">Customer</h3>
+            <button type="button" class="drawer-close-btn" id="btnCloseReceipts" aria-label="Close">&times;</button>
+        </div>
+        <div class="receipts-list" id="receiptsList">
+            <div class="receipts-empty">Loading…</div>
+        </div>
+    </aside>
+</div>
+
+@section Scripts {
+    <script src="~/js/customers.js" asp-append-version="true"></script>
+}

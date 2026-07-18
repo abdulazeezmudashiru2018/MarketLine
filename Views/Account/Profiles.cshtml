@@ -1,0 +1,75 @@
+﻿@model IEnumerable<MarketLine.Models.UserAccount>
+@{
+    ViewData["Title"] = "User Profiles";
+}
+
+<link rel="stylesheet" href="~/css/profiles.css" />
+
+<div class="profiles-container">
+    <div class="profiles-header">
+        <h1>👤 MarketLine Team</h1>
+        <p>Managing the platform's core accounts (Limit: 3 Users)</p>
+    </div>
+
+    <div class="profiles-grid">
+        @foreach (var user in Model)
+        {
+            <div class="profile-card">
+                <div class="card-glow"></div>
+                <div class="profile-top">
+                    <div class="avatar">
+                        @user.FirstName.Substring(0, 1)@user.LastName.Substring(0, 1)
+                    </div>
+                    <span class="user-id">ID: #@user.Id.ToString("D3")</span>
+                </div>
+
+                <div class="profile-info">
+                    <h2>@user.FirstName @user.LastName</h2>
+                    <span class="role-badge">System Administrator</span>
+
+                    <div class="info-item">
+                        <span class="icon">✉️</span>
+                        <div class="details">
+                            <label>Email Address</label>
+                            <p>@user.Email</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="icon">📞</span>
+                        <div class="details">
+                            <label>Phone Number</label>
+                            <p>@user.PhoneNumber</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="icon">📅</span>
+                        <div class="details">
+                            <label>Joined Since</label>
+                            <p>@user.CreatedAt.ToString("MMM dd, yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="status-indicator">
+                        <span class="dot"></span> Active Session
+                    </div>
+                </div>
+            </div>
+        }
+
+        @* Fill remaining slots if less than 3 users *@
+        @for (int i = 0; i < (3 - Model.Count()); i++)
+        {
+            <div class="profile-card empty-slot">
+                <div class="empty-content">
+                    <div class="empty-icon">➕</div>
+                    <p>Empty Account Slot</p>
+                    <a href="/Account/Register" class="btn-fill">Register User</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
