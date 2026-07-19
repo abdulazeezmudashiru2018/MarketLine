@@ -1,38 +1,25 @@
-# Git and IDE files
-.git/
+bin/
+obj/
 .vs/
 .vscode/
 .idea/
-
-# .NET build output
-bin/
-obj/
-**/bin/
-**/obj/
-
-# User / Visual Studio files
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-
-# Local-only configuration
+.git/
+.gitignore
+.gitattributes
 appsettings.Development.json
-appsettings.Production.json
 appsettings.Local.json
+secrets.json
 .env
 .env.*
-
-# Local databases
-*.mdf
-*.ldf
-*.db
-*.sqlite
-*.sqlite3
-
-# Do not copy local uploaded customer images/videos into Docker image.
-# Render Persistent Disk will hold these files in production.
-wwwroot/uploads/
-
-# Local backup folders, if any exist inside the project
-MarketLine_Backup_Before_GitHub/
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep
+.DS_Store
+Thumbs.db
+desktop.ini
+logs/
+*.log
+Dockerfile
+.dockerignore
+README.md
+LICENSE
+*.md

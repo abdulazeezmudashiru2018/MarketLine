@@ -27,25 +27,25 @@ namespace MarketLine.Data
             // "No store type was specified for decimal property" warning)
             modelBuilder.Entity<Sale>()
                 .Property(s => s.Amount)
-                .HasColumnType("decimal(18,2)");
+              .HasColumnType("numeric(18,2)");
 
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
-                .HasColumnType("decimal(18,2)");
+              .HasColumnType("numeric(18,2)");
 
             modelBuilder.Entity<SaleInvoice>()
                 .Property(s => s.TotalAmount)
-                .HasColumnType("decimal(18,2)");
+              .HasColumnType("numeric(18,2)");
 
             modelBuilder.Entity<SaleInvoiceItem>()
                 .Property(i => i.Quantity)
-                .HasColumnType("decimal(18,2)");
+               .HasColumnType("numeric(18,2)");
             modelBuilder.Entity<SaleInvoiceItem>()
                 .Property(i => i.UnitPrice)
-                .HasColumnType("decimal(18,2)");
+               .HasColumnType("numeric(18,2)");
             modelBuilder.Entity<SaleInvoiceItem>()
                 .Property(i => i.TotalPrice)
-                .HasColumnType("decimal(18,2)");
+               .HasColumnType("numeric(18,2)");
 
             modelBuilder.Entity<SaleInvoice>()
                 .HasOne(s => s.Customer)
@@ -59,7 +59,7 @@ namespace MarketLine.Data
                 .HasForeignKey(i => i.SaleInvoiceId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            var today = new DateTime(2026, 7, 15);
+            var today = DateTime.SpecifyKind(new DateTime(2026, 7, 15), DateTimeKind.Utc);
 
 
             modelBuilder.Entity<Sale>().HasData(
@@ -74,7 +74,7 @@ namespace MarketLine.Data
             // Add this inside protected override void OnModelCreating(ModelBuilder modelBuilder)
             modelBuilder.Entity<CustomerOrder>()
                 .Property(o => o.Total)
-                .HasColumnType("decimal(18,2)");
+              .HasColumnType("numeric(18,2)");
         }
 
 
