@@ -16,6 +16,13 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 // MVC
 builder.Services.AddControllersWithViews();
 
+// Bind Cloudinary settings
+builder.Services.Configure<MarketLine.Models.CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
+
+// Register Cloudinary Photos Service
+builder.Services.AddScoped<MarketLine.Services.IPhotoService, MarketLine.Services.PhotoService>();
+
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-CSRF-TOKEN";
