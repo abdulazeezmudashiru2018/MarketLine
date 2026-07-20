@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MarketLine.Data;
 using MarketLine.Models;
+using MarketLine.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -13,15 +13,15 @@ namespace MarketLine.Controllers
     public class GoodsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _env;
+        private readonly IPhotoService _photoService;
 
         private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
         private const long MaxImageBytes = 5 * 1024 * 1024; // 5 MB
 
-        public GoodsController(ApplicationDbContext context, IWebHostEnvironment env)
+        public GoodsController(ApplicationDbContext context, IPhotoService photoService)
         {
             _context = context;
-            _env = env;
+            _photoService = photoService;
         }
 
         // GET: /Goods  -> the gallery page
@@ -35,7 +35,6 @@ namespace MarketLine.Controllers
         }
 
         // GET: /Goods/Search?q=coke  -> JSON list for the Sales invoice
-        // "Goods" drawer/search box. Returns everything when q is empty.
         [HttpGet]
         public async Task<IActionResult> Search(string? q)
         {
@@ -63,8 +62,7 @@ namespace MarketLine.Controllers
             return Ok(results);
         }
 
-        // GET: /Goods/ByBarcode?code=012345678905  -> used by the camera
-        // scanner on the Sales invoice page to auto-add a scanned item.
+        // GET: /Goods/ByBarcode?code=012345678905
         [HttpGet]
         public async Task<IActionResult> ByBarcode(string code)
         {
@@ -80,7 +78,7 @@ namespace MarketLine.Controllers
             return Ok(ProductDto.FromEntity(product));
         }
 
-        // POST: /Goods/Create  (multipart/form-data: Name, Price, Barcode, Image)
+        // POST: /Goods/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromForm] ProductFormInput input)
@@ -94,7 +92,7 @@ namespace MarketLine.Controllers
             string? imagePath = null;
             if (input.Image != null)
             {
-                var (ok, error, savedPath) = await SaveImageAsync(input.Image);
+                var (ok, error, savedPath) = await SaveImageToCloudAsync(input.Image);
                 if (!ok) return BadRequest(new { message = error });
                 imagePath = savedPath;
             }
@@ -105,7 +103,7 @@ namespace MarketLine.Controllers
                 Price = input.Price,
                 ImagePath = imagePath,
                 Barcode = string.IsNullOrWhiteSpace(input.Barcode) ? null : input.Barcode.Trim(),
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.Products.Add(product);
@@ -114,7 +112,7 @@ namespace MarketLine.Controllers
             return Ok(ProductDto.FromEntity(product));
         }
 
-        // POST: /Goods/Edit  (multipart/form-data: Id, Name, Price, Barcode, Image?)
+        // POST: /Goods/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([FromForm] ProductFormInput input)
@@ -134,10 +132,11 @@ namespace MarketLine.Controllers
 
             if (input.Image != null)
             {
-                var (ok, error, savedPath) = await SaveImageAsync(input.Image);
+                var (ok, error, savedPath) = await SaveImageToCloudAsync(input.Image);
                 if (!ok) return BadRequest(new { message = error });
 
-                DeletePhysicalImage(product.ImagePath);
+                // Delete the old cloud image first
+                await DeleteCloudImageAsync(product.ImagePath);
                 product.ImagePath = savedPath;
             }
 
@@ -154,7 +153,8 @@ namespace MarketLine.Controllers
             var product = await _context.Products.FindAsync(id);
             if (product == null) return NotFound(new { message = "Item not found." });
 
-            DeletePhysicalImage(product.ImagePath);
+            // Delete the image permanently from Cloudinary
+            await DeleteCloudImageAsync(product.ImagePath);
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
@@ -162,9 +162,9 @@ namespace MarketLine.Controllers
             return Ok(new { id });
         }
 
-        // ---- helpers ----------------------------------------------------
+        // ---- Cloud Helpers ----------------------------------------------------
 
-        private async Task<(bool ok, string? error, string? path)> SaveImageAsync(Microsoft.AspNetCore.Http.IFormFile file)
+        private async Task<(bool ok, string? error, string? path)> SaveImageToCloudAsync(Microsoft.AspNetCore.Http.IFormFile file)
         {
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!AllowedExtensions.Contains(ext))
@@ -173,29 +173,40 @@ namespace MarketLine.Controllers
             if (file.Length > MaxImageBytes)
                 return (false, "Image must be smaller than 5 MB.", null);
 
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "goods");
-            Directory.CreateDirectory(uploadsFolder);
+            // Upload directly to Cloudinary under the "MarketLine/Products" folder
+            var uploadResult = await _photoService.UploadMediaAsync(file, "MarketLine/Products");
 
-            var fileName = $"{Guid.NewGuid():N}{ext}";
-            var fullPath = Path.Combine(uploadsFolder, fileName);
+            if (uploadResult.Error != null)
+                return (false, uploadResult.Error.Message, null);
 
-            using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            return (true, null, $"/uploads/goods/{fileName}");
+            return (true, null, uploadResult.SecureUrl.ToString());
         }
 
-        private void DeletePhysicalImage(string? relativePath)
+        private async Task DeleteCloudImageAsync(string? imageUrl)
         {
-            if (string.IsNullOrWhiteSpace(relativePath)) return;
+            if (string.IsNullOrWhiteSpace(imageUrl)) return;
 
-            var fullPath = Path.Combine(_env.WebRootPath, relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-            if (System.IO.File.Exists(fullPath))
+            try
             {
-                try { System.IO.File.Delete(fullPath); } catch { /* non-fatal cleanup */ }
+                // Ensure it is a Cloudinary URL before deleting
+                if (imageUrl.Contains("cloudinary.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    var uri = new Uri(imageUrl);
+                    var pathSegments = uri.AbsolutePath.Split('/');
+
+                    // Cloudinary path Segment structure: /cloudname/image/upload/v12345/MarketLine/Products/filename.jpg
+                    var folderIndex = Array.IndexOf(pathSegments, "MarketLine");
+                    if (folderIndex != -1)
+                    {
+                        var segmentsToKeep = pathSegments.Skip(folderIndex);
+                        var fullPublicIdWithExtension = string.Join("/", segmentsToKeep);
+                        var publicId = Path.ChangeExtension(fullPublicIdWithExtension, null); // Removes .jpg
+
+                        await _photoService.DeleteMediaAsync(publicId);
+                    }
+                }
             }
+            catch { /* Ignore non-fatal deletion issues during cleanup */ }
         }
     }
 }
