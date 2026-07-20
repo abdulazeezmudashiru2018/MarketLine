@@ -31,7 +31,6 @@ namespace MarketLine.Services
                 using var stream = file.OpenReadStream();
                 var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-                // Determine if it is a video or image
                 if (ext == ".mp4" || ext == ".mov" || ext == ".webm" || ext == ".ogg")
                 {
                     var uploadParams = new VideoUploadParams
@@ -40,7 +39,8 @@ namespace MarketLine.Services
                         Folder = folderName,
                         Overwrite = true
                     };
-                    uploadResult = await _cloudinary.UploadLargeAsync(uploadParams);
+                    // Use robust standard UploadAsync instead of chunked UploadLargeAsync
+                    uploadResult = await _cloudinary.UploadAsync(uploadParams);
                 }
                 else
                 {

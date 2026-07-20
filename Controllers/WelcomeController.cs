@@ -16,7 +16,7 @@ namespace MarketLine.Controllers
 
         private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
         private static readonly string[] VideoExtensions = { ".mp4", ".webm", ".ogg", ".mov" };
-        private const long MaxFileBytes = 40 * 1024 * 1024; // 40 MB
+        private const long MaxFileBytes = 50 * 1024 * 1024; // Increased to 50 MB
 
         public WelcomeController(ApplicationDbContext context, IPhotoService photoService)
         {
@@ -60,6 +60,8 @@ namespace MarketLine.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequestSizeLimit(52428800)] // Force ASP.NET to accept up to 50MB requests
+        [RequestFormLimits(MultipartBodyLengthLimit = 52428800)] // 50MB form size
         public async Task<IActionResult> UploadMedia(string slot, IFormFile file)
         {
             slot = (slot ?? "").Trim().ToLowerInvariant();
@@ -70,7 +72,7 @@ namespace MarketLine.Controllers
                 return BadRequest(new { message = "Please choose a file." });
 
             if (file.Length > MaxFileBytes)
-                return BadRequest(new { message = "File must be smaller than 40 MB." });
+                return BadRequest(new { message = "File must be smaller than 50 MB." });
 
             var ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
             string mediaType;
@@ -78,7 +80,6 @@ namespace MarketLine.Controllers
             else if (VideoExtensions.Contains(ext)) mediaType = "video";
             else return BadRequest(new { message = "Only image (jpg, png, webp, gif) or video (mp4, webm, mov) files are allowed." });
 
-            // Upload directly to Cloudinary folder "MarketLine/Landing"
             var uploadResult = await _photoService.UploadMediaAsync(file, "MarketLine/Landing");
 
             if (uploadResult.Error != null)
@@ -89,7 +90,7 @@ namespace MarketLine.Controllers
             var media = new LandingMedia
             {
                 Slot = slot,
-                FilePath = uploadResult.SecureUrl.ToString(), // Storing secure HTTPS cloudinary URL!
+                FilePath = uploadResult.SecureUrl.ToString(),
                 MediaType = mediaType,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -107,7 +108,6 @@ namespace MarketLine.Controllers
             var media = await _context.LandingMediaItems.FindAsync(id);
             if (media == null) return NotFound(new { message = "Not found." });
 
-            // Extract the Cloudinary Public ID to delete it from the cloud
             try
             {
                 var uri = new Uri(media.FilePath);
@@ -117,7 +117,7 @@ namespace MarketLine.Controllers
                 {
                     var segmentsToKeep = pathSegments.Skip(folderIndex);
                     var fullPublicIdWithExtension = string.Join("/", segmentsToKeep);
-                    var publicId = System.IO.Path.ChangeExtension(fullPublicIdWithExtension, null); // Removes extension
+                    var publicId = System.IO.Path.ChangeExtension(fullPublicIdWithExtension, null);
 
                     await _photoService.DeleteMediaAsync(publicId);
                 }
