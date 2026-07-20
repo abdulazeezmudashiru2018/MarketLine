@@ -17,6 +17,30 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/welcome.css" asp-append-version="true" />
+
+ 
+        <!-- Custom CSS Fix to pull the right pencil button on-screen -->
+        <style>
+                    /* Force the right edit button to align to the visible left edge of the right crescent */
+                    .hero-media-right .hero-media-edit-btn {
+                        right: auto !important;
+                        left: 20px !important; /* Positions it on the inner visible edge */
+                        bottom: 20px !important;
+                        display: flex !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        z-index: 9999 !important;
+                    }
+
+                    /* Adjust position slightly for larger screens if needed */
+                    @@media (min-width: 1200px) {
+                        .hero-media-right .hero-media-edit-btn {
+                            left: 40px !important;
+                            bottom: 40px !important;
+                        }
+                    }
+        </style>
+    
 </head>
 <body>
 
