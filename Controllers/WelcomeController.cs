@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MarketLine.Data;
 using MarketLine.Models;
+using MarketLine.Services;
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,19 +12,18 @@ namespace MarketLine.Controllers
     public class WelcomeController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _env;
+        private readonly IPhotoService _photoService;
 
         private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
         private static readonly string[] VideoExtensions = { ".mp4", ".webm", ".ogg", ".mov" };
-        private const long MaxFileBytes = 40 * 1024 * 1024; // 40 MB (video-friendly)
+        private const long MaxFileBytes = 40 * 1024 * 1024; // 40 MB
 
-        public WelcomeController(ApplicationDbContext context, IWebHostEnvironment env)
+        public WelcomeController(ApplicationDbContext context, IPhotoService photoService)
         {
             _context = context;
-            _env = env;
+            _photoService = photoService;
         }
 
-        // GET: / -> the public landing page
         public async Task<IActionResult> Index()
         {
             var left = await _context.LandingMediaItems
@@ -44,8 +42,6 @@ namespace MarketLine.Controllers
             return View();
         }
 
-        // GET: /Welcome/MediaList?slot=left -> JSON list of slides for the
-        // manage panel inside the upload modal.
         [HttpGet]
         public async Task<IActionResult> MediaList(string slot)
         {
@@ -62,9 +58,6 @@ namespace MarketLine.Controllers
             return Ok(items);
         }
 
-        // POST: /Welcome/UploadMedia  (multipart/form-data: Slot, File)
-        // Adds a new slide to the slot's slideshow (does not replace
-        // existing slides — use DeleteMedia to remove old ones).
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadMedia(string slot, IFormFile file)
@@ -79,39 +72,34 @@ namespace MarketLine.Controllers
             if (file.Length > MaxFileBytes)
                 return BadRequest(new { message = "File must be smaller than 40 MB." });
 
-            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
             string mediaType;
             if (ImageExtensions.Contains(ext)) mediaType = "image";
             else if (VideoExtensions.Contains(ext)) mediaType = "video";
             else return BadRequest(new { message = "Only image (jpg, png, webp, gif) or video (mp4, webm, mov) files are allowed." });
 
-            var folder = Path.Combine(_env.WebRootPath, "uploads", "landing");
-            Directory.CreateDirectory(folder);
+            // Upload directly to Cloudinary folder "MarketLine/Landing"
+            var uploadResult = await _photoService.UploadMediaAsync(file, "MarketLine/Landing");
 
-            var fileName = $"{slot}-{Guid.NewGuid():N}{ext}";
-            var fullPath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(fullPath, FileMode.Create))
+            if (uploadResult.Error != null)
             {
-                await file.CopyToAsync(stream);
+                return BadRequest(new { message = uploadResult.Error.Message });
             }
-
-            var relativePath = $"/uploads/landing/{fileName}";
 
             var media = new LandingMedia
             {
                 Slot = slot,
-                FilePath = relativePath,
+                FilePath = uploadResult.SecureUrl.ToString(), // Storing secure HTTPS cloudinary URL!
                 MediaType = mediaType,
-                UpdatedAt = DateTime.Now
+                UpdatedAt = DateTime.UtcNow
             };
+
             _context.LandingMediaItems.Add(media);
             await _context.SaveChangesAsync();
 
-            return Ok(new { id = media.Id, slot, mediaType, path = relativePath });
+            return Ok(new { id = media.Id, slot, mediaType, path = media.FilePath });
         }
 
-        // POST: /Welcome/DeleteMedia  (id)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMedia(int id)
@@ -119,11 +107,22 @@ namespace MarketLine.Controllers
             var media = await _context.LandingMediaItems.FindAsync(id);
             if (media == null) return NotFound(new { message = "Not found." });
 
-            var fullPath = Path.Combine(_env.WebRootPath, media.FilePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-            if (System.IO.File.Exists(fullPath))
+            // Extract the Cloudinary Public ID to delete it from the cloud
+            try
             {
-                try { System.IO.File.Delete(fullPath); } catch { /* non-fatal cleanup */ }
+                var uri = new Uri(media.FilePath);
+                var pathSegments = uri.AbsolutePath.Split('/');
+                var folderIndex = Array.IndexOf(pathSegments, "MarketLine");
+                if (folderIndex != -1)
+                {
+                    var segmentsToKeep = pathSegments.Skip(folderIndex);
+                    var fullPublicIdWithExtension = string.Join("/", segmentsToKeep);
+                    var publicId = System.IO.Path.ChangeExtension(fullPublicIdWithExtension, null); // Removes extension
+
+                    await _photoService.DeleteMediaAsync(publicId);
+                }
             }
+            catch { /* Ignore non-fatal cleanup deletion errors */ }
 
             _context.LandingMediaItems.Remove(media);
             await _context.SaveChangesAsync();
