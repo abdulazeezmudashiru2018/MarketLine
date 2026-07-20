@@ -8,96 +8,399 @@
 <head>
     <meta charset="utf-8" />
     <title>MarketLine - Order</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Strictly closed link tags -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/order.css" />
 
     <!-- Visual Harmony CSS Overrides -->
     <style>
-        /* 1. Dark Theme Page Background */
-        body.order-body {
-            background-color: #061108 !important;
-            background-image: radial-gradient(circle at center, #0c2012 0%, #040d06 100%) !important;
-            color: #f0fdf4 !important;
-            font-family: 'Poppins', sans-serif !important;
-            min-height: 100vh;
-        }
+            /* 1. Dark Theme Page Background */
+            body.order-body {
+                background-color: #061108 !important;
+                background-image: radial-gradient(circle at center, #0c2012 0%, #040d06 100%) !important;
+                color: #f0fdf4 !important;
+                font-family: 'Poppins', sans-serif !important;
+                min-height: 100vh;
+                margin: 0;
+                position: relative;
+                overflow-x: hidden;
+            }
 
-        /* 2. Custom Colored Ambient Glow Orbs */
-        .orb1 { background: radial-gradient(circle, rgba(126, 217, 87, 0.25) 0%, transparent 70%) !important; }
-        .orb2 { background: radial-gradient(circle, rgba(255, 215, 106, 0.18) 0%, transparent 70%) !important; }
-        .orb3 { background: radial-gradient(circle, rgba(126, 217, 87, 0.15) 0%, transparent 70%) !important; }
-        .orb4 { background: radial-gradient(circle, rgba(255, 215, 106, 0.12) 0%, transparent 70%) !important; }
+            /* 2. Custom Colored Ambient Glow Orbs */
+            .glow-bg {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                overflow: hidden;
+                pointer-events: none;
+            }
 
-        /* 3. Translucent Glassmorphic Main Panels */
-        .products-panel, .cart-panel {
-            background: rgba(10, 24, 13, 0.45) !important;
-            border: 1px solid rgba(126, 217, 87, 0.18) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5) !important;
-            border-radius: 16px !important;
-            overflow: hidden;
-        }
+            .glow-orb {
+                position: absolute;
+                width: 600px;
+                height: 600px;
+                border-radius: 50%;
+                filter: blur(80px);
+                opacity: 0.6;
+            }
 
-        /* 4. Left Panel Header - Forest / Neon Green (Matching Left Circle) */
-        .panel-header.header-orange {
-            background: linear-gradient(135deg, rgba(126, 217, 87, 0.15), rgba(10, 24, 13, 0.95)) !important;
-            border-bottom: 2px solid #7ed957 !important;
-            color: #ffffff !important;
-        }
-        .panel-header.header-orange .header-icon {
-            background: #7ed957 !important;
-            color: #051007 !important;
-            border-radius: 10px !important;
-            box-shadow: 0 0 15px rgba(126, 217, 87, 0.4) !important;
-        }
+            .orb1 {
+                top: -200px;
+                left: -200px;
+                background: radial-gradient(circle, rgba(126, 217, 87, 0.2) 0%, transparent 70%) !important;
+            }
 
-        /* 5. Right Panel Header - Dark / Premium Gold (Matching Right Circle) */
-        .panel-header.header-blue {
-            background: linear-gradient(135deg, rgba(255, 215, 106, 0.15), rgba(10, 24, 13, 0.95)) !important;
-            border-bottom: 2px solid #ffd76a !important;
-            color: #ffffff !important;
-        }
-        .panel-header.header-blue .header-icon {
-            background: #ffd76a !important;
-            color: #051007 !important;
-            border-radius: 10px !important;
-            box-shadow: 0 0 15px rgba(255, 215, 106, 0.4) !important;
-        }
+            .orb2 {
+                bottom: -200px;
+                right: -200px;
+                background: radial-gradient(circle, rgba(255, 215, 106, 0.15) 0%, transparent 70%) !important;
+            }
 
-        /* 6. Dark Glowing Product Cards */
-        .product-card {
-            background: rgba(18, 38, 22, 0.35) !important;
-            border: 1px solid rgba(126, 217, 87, 0.12) !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-            border-radius: 14px !important;
-            padding: 15px !important;
-        }
-        .product-card:hover {
-            transform: translateY(-5px) scale(1.02) !important;
-            border-color: #7ed957 !important;
-            box-shadow: 0 0 25px rgba(126, 217, 87, 0.35) !important;
-            background: rgba(18, 38, 22, 0.6) !important;
-        }
-        .product-card h3 {
-            color: #ffffff !important;
-            font-size: 15px !important;
-            font-weight: 600 !important;
-        }
-        .product-card .price {
-            color: #ffd76a !important; /* Gold price accent */
-            font-weight: 800 !important;
-            font-size: 17px !important;
-        }
-        .product-card .badge {
-            background: rgba(126, 217, 87, 0.12) !important;
-            color: #7ed957 !important;
-            border: 1px solid rgba(126, 
+            .orb3 {
+                top: 40%;
+                right: -300px;
+                background: radial-gradient(circle, rgba(126, 217, 87, 0.1) 0%, transparent 70%) !important;
+            }
 
+            .orb4 {
+                bottom: 40%;
+                left: -300px;
+                background: radial-gradient(circle, rgba(255, 215, 106, 0.08) 0%, transparent 70%) !important;
+            }
 
+            /* 3. Translucent Glassmorphic Main Panels */
+            .products-panel, .cart-panel {
+                background: rgba(10, 24, 13, 0.55) !important;
+                border: 1px solid rgba(126, 217, 87, 0.15) !important;
+                backdrop-filter: blur(16px) !important;
+                -webkit-backdrop-filter: blur(16px) !important;
+                box-shadow: 0 15px 45px rgba(0, 0, 0, 0.65) !important;
+                border-radius: 20px !important;
+                overflow: hidden;
+            }
+
+            /* 4. Left Panel Header - Forest / Neon Green */
+            .panel-header.header-orange {
+                background: linear-gradient(135deg, rgba(126, 217, 87, 0.12), rgba(6, 17, 8, 0.95)) !important;
+                border-bottom: 2px solid #7ed957 !important;
+                color: #ffffff !important;
+            }
+
+                .panel-header.header-orange .header-icon {
+                    background: #7ed957 !important;
+                    color: #061108 !important;
+                    border-radius: 12px !important;
+                    box-shadow: 0 0 20px rgba(126, 217, 87, 0.45) !important;
+                }
+
+            /* 5. Right Panel Header - Dark / Premium Gold */
+            .panel-header.header-blue {
+                background: linear-gradient(135deg, rgba(255, 215, 106, 0.12), rgba(6, 17, 8, 0.95)) !important;
+                border-bottom: 2px solid #ffd76a !important;
+                color: #ffffff !important;
+            }
+
+                .panel-header.header-blue .header-icon {
+                    background: #ffd76a !important;
+                    color: #061108 !important;
+                    border-radius: 12px !important;
+                    box-shadow: 0 0 20px rgba(255, 215, 106, 0.45) !important;
+                }
+
+            /* 6. Dark Glowing Product Cards */
+            .product-card {
+                background: rgba(14, 30, 18, 0.45) !important;
+                border: 1px solid rgba(126, 217, 87, 0.1) !important;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+                border-radius: 16px !important;
+                padding: 16px !important;
+            }
+
+                .product-card:hover {
+                    transform: translateY(-6px) scale(1.02) !important;
+                    border-color: #7ed957 !important;
+                    box-shadow: 0 0 30px rgba(126, 217, 87, 0.35) !important;
+                    background: rgba(14, 30, 18, 0.7) !important;
+                }
+
+                .product-card h3 {
+                    color: #ffffff !important;
+                    font-size: 15px !important;
+                    font-weight: 600 !important;
+                    margin: 12px 0 8px 0 !important;
+                }
+
+                .product-card .price {
+                    color: #ffd76a !important;
+                    font-weight: 800 !important;
+                    font-size: 18px !important;
+                }
+
+                .product-card .badge {
+                    background: rgba(126, 217, 87, 0.15) !important;
+                    color: #7ed957 !important;
+                    border: 1px solid rgba(126, 217, 87, 0.2) !important;
+                    border-radius: 6px !important;
+                    font-size: 11px !important;
+                }
+
+            .product-img {
+                border-radius: 12px !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                background: rgba(255, 255, 255, 0.05) !important;
+            }
+
+            .product-icon {
+                background: rgba(255, 255, 255, 0.05) !important;
+                color: rgba(255, 255, 255, 0.4) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 12px !important;
+            }
+
+            /* 7. Forms, Titles & Inputs */
+            .section-title {
+                color: #ffffff !important;
+                border-bottom: 1px solid rgba(126, 217, 87, 0.15) !important;
+                padding-bottom: 8px !important;
+                margin-top: 25px !important;
+                font-weight: 600 !important;
+                font-size: 15px !important;
+            }
+
+            .form-input {
+                background: rgba(6, 17, 8, 0.5) !important;
+                border: 1px solid rgba(126, 217, 87, 0.15) !important;
+                color: #ffffff !important;
+                border-radius: 8px !important;
+                padding: 12px 14px !important;
+                transition: all 0.2s ease !important;
+            }
+
+                .form-input:focus {
+                    border-color: #7ed957 !important;
+                    box-shadow: 0 0 10px rgba(126, 217, 87, 0.25) !important;
+                    outline: none !important;
+                    background: rgba(6, 17, 8, 0.7) !important;
+                }
+
+                .form-input::placeholder {
+                    color: rgba(255, 255, 255, 0.4) !important;
+                }
+
+            /* 8. Pay Option Selectors */
+            .pay-option {
+                background: rgba(6, 17, 8, 0.4) !important;
+                border: 1px solid rgba(126, 217, 87, 0.1) !important;
+                color: rgba(255, 255, 255, 0.7) !important;
+                border-radius: 8px !important;
+                padding: 12px 14px !important;
+                transition: all 0.2s ease !important;
+            }
+
+                .pay-option:hover {
+                    background: rgba(6, 17, 8, 0.6) !important;
+                    color: #ffffff !important;
+                }
+
+                .pay-option.selected {
+                    border-color: #7ed957 !important;
+                    background: rgba(126, 217, 87, 0.08) !important;
+                    color: #7ed957 !important;
+                    box-shadow: 0 0 12px rgba(126, 217, 87, 0.15) !important;
+                }
+
+            /* 9. Buttons Configuration */
+            /* Add Button */
+            .btn-add {
+                background: #7ed957 !important;
+                color: #061108 !important;
+                border: none !important;
+                border-radius: 8px !important;
+                font-weight: 700 !important;
+                padding: 8px 16px !important;
+                transition: all 0.2s ease !important;
+                box-shadow: 0 4px 12px rgba(126, 217, 87, 0.25) !important;
+            }
+
+                .btn-add:hover {
+                    background: #9cf578 !important;
+                    transform: scale(1.05) !important;
+                    box-shadow: 0 0 15px #7ed957 !important;
+                }
+
+            /* Place Order Button */
+            .btn-place-order {
+                background: linear-gradient(135deg, #ffd76a, #ffb703) !important;
+                color: #061108 !important;
+                border: none !important;
+                border-radius: 10px !important;
+                font-weight: 800 !important;
+                font-size: 16px !important;
+                padding: 16px !important;
+                transition: all 0.2s ease !important;
+                box-shadow: 0 5px 20px rgba(255, 215, 106, 0.25) !important;
+                width: 100%;
+            }
+
+                .btn-place-order:hover:not(:disabled) {
+                    transform: translateY(-2px) !important;
+                    box-shadow: 0 0 25px rgba(255, 215, 106, 0.45) !important;
+                }
+
+                .btn-place-order:disabled {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    color: rgba(255, 255, 255, 0.25) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                    box-shadow: none !important;
+                    cursor: not-allowed !important;
+                }
+
+            /* 10. Cart Items, List, & Empty States */
+            .cart-empty {
+                background: rgba(255, 255, 255, 0.02) !important;
+                border: 1px dashed rgba(255, 255, 255, 0.1) !important;
+                border-radius: 12px !important;
+                padding: 20px !important;
+                color: rgba(255, 255, 255, 0.4) !important;
+                text-align: center;
+            }
+
+            .empty-icon {
+                color: rgba(255, 255, 255, 0.15) !important;
+                font-size: 40px !important;
+            }
+
+            .cart-item {
+                background: rgba(255, 255, 255, 0.03) !important;
+                border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                border-radius: 8px !important;
+                padding: 10px 14px !important;
+                color: #ffffff !important;
+                border-left: 3px solid #7ed957 !important;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            .remove-btn {
+                background: rgba(255, 107, 107, 0.1) !important;
+                color: #ff6b6b !important;
+                border: 1px solid rgba(255, 107, 107, 0.2) !important;
+                border-radius: 4px !important;
+                width: 24px !important;
+                height: 24px !important;
+                cursor: pointer;
+            }
+
+                .remove-btn:hover {
+                    background: #ff6b6b !important;
+                    color: #ffffff !important;
+                }
+
+            /* 11. Custom Modals */
+            .modal {
+                background-color: rgba(4, 13, 6, 0.85) !important;
+                backdrop-filter: blur(12px) !important;
+                -webkit-backdrop-filter: blur(12px) !important;
+            }
+
+            .modal-content {
+                background: rgba(10, 24, 13, 0.95) !important;
+                border: 1px solid rgba(126, 217, 87, 0.25) !important;
+                border-radius: 20px !important;
+                box-shadow: 0 15px 50px rgba(0,0,0,0.8) !important;
+                color: #ffffff !important;
+                padding: 30px !important;
+            }
+
+                .modal-content h2 {
+                    color: #ffffff !important;
+                    font-weight: 700 !important;
+                    font-size: 22px !important;
+                    border-bottom: 2px solid #7ed957 !important;
+                    padding-bottom: 10px !important;
+                    margin-top: 0 !important;
+                }
+
+            .account-details {
+                background: rgba(6, 17, 8, 0.6) !important;
+                border: 1px solid rgba(126, 217, 87, 0.15) !important;
+                border-radius: 12px !important;
+                padding: 15px 20px !important;
+                color: #ffffff !important;
+                text-align: left;
+            }
+
+                .account-details strong {
+                    color: #7ed957 !important;
+                }
+
+            .card-form label {
+                color: rgba(255, 255, 255, 0.7) !important;
+                font-size: 13px !important;
+                display: block;
+                margin-bottom: 5px;
+                text-align: left;
+            }
+
+            .card-form input {
+                background: rgba(6, 17, 8, 0.6) !important;
+                border: 1px solid rgba(126, 217, 87, 0.15) !important;
+                color: #ffffff !important;
+                border-radius: 8px !important;
+                padding: 10px 12px !important;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+                .card-form input:focus {
+                    border-color: #7ed957 !important;
+                    box-shadow: 0 0 10px rgba(126, 217, 87, 0.2) !important;
+                    outline: none !important;
+                }
+
+            .btn-confirm {
+                background: #7ed957 !important;
+                color: #061108 !important;
+                border: none !important;
+                border-radius: 8px !important;
+                font-weight: 700 !important;
+                padding: 12px 24px !important;
+                box-shadow: 0 4px 15px rgba(126, 217, 87, 0.3) !important;
+                cursor: pointer;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+                .btn-confirm:hover {
+                    background: #9cf578 !important;
+                    box-shadow: 0 0 20px rgba(126, 217, 87, 0.5) !important;
+                }
+
+            .btn-cancel {
+                background: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                color: rgba(255, 255, 255, 0.7) !important;
+                border-radius: 8px !important;
+                padding: 10px 20px !important;
+                cursor: pointer;
+                width: 100%;
+            }
+
+                .btn-cancel:hover {
+                    background: rgba(255, 255, 255, 0.1) !important;
+                    color: #ffffff !important;
+                }
+    </style>
+</head>
 <body class="order-body">
 
     <div class="glow-bg">
@@ -199,14 +502,14 @@
     <div id="bankModal" class="modal">
         <div class="modal-content">
             <h2>🏦 Bank Transfer Details</h2>
-            <p style="color:#6b7280;margin-bottom:15px;">Please transfer to the account below:</p>
+            <p style="color:#a3a3a3;margin-bottom:15px;">Please transfer to the account below:</p>
             <div class="account-details">
                 <p><strong>Account Name:</strong> YAH-WAKEEL STORE</p>
                 <p><strong>Account Number:</strong> 5650601808</p>
                 <p><strong>Bank:</strong> MONIEPOINT</p>
                 <p><strong>Amount:</strong> ₦<span id="bankAmount">0</span></p>
             </div>
-            <button id="confirmTransfer" class="btn-confirm">✅ I Have Made The Transfer</button>
+            <button id="confirmTransfer" class="btn-confirm" style="margin-top:15px;">✅ I Have Made The Transfer</button>
             <button onclick="closeModal('bankModal')" class="btn-cancel">Cancel</button>
         </div>
     </div>
@@ -219,18 +522,18 @@
                 <label>Card Number</label>
                 <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" />
 
-                <div class="row-2" style="margin-top:10px;">
-                    <div>
+                <div class="row-2" style="margin-top:10px; display: flex; gap: 10px;">
+                    <div style="flex: 1;">
                         <label>Expiry (MM/YY)</label>
                         <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" />
                     </div>
-                    <div>
+                    <div style="flex: 1;">
                         <label>CVC</label>
                         <input type="text" id="cvc" placeholder="123" maxlength="4" />
                     </div>
                 </div>
 
-                <p style="margin-top:15px;color:#6b7280;font-size:13px;">
+                <p style="margin-top:15px;color:#a3a3a3;font-size:13px;">
                     💰 Payment goes to: <strong>YAH-WAKEEL STORE (Moniepoint)</strong>
                 </p>
 
@@ -247,7 +550,7 @@
         <div class="modal-content" style="text-align:center;">
             <div style="font-size:60px;">✅</div>
             <h2>Order Placed Successfully!</h2>
-            <p style="color:#6b7280;margin:10px 0;">Thank you for your order. You'll receive a confirmation soon.</p>
+            <p style="color:#a3a3a3;margin:10px 0;">Thank you for your order. You'll receive a confirmation soon.</p>
             <button onclick="closeModal('successModal');location.reload();" class="btn-confirm">Continue Shopping</button>
         </div>
     </div>
@@ -306,8 +609,6 @@
                 cartItemsEl.scrollTop = cartItemsEl.scrollHeight;
             });
                     document.querySelectorAll('.remove-btn').forEach(b => {
-
-
                         b.addEventListener('click', () => {
                             cart = cart.filter(x => x.id !== b.dataset.id);
                             render();
@@ -349,7 +650,7 @@
             }
             });
 
-                       function closeModal(id) {
+            function closeModal(id) {
                 document.getElementById(id).classList.remove('show');
             }
 
@@ -396,7 +697,7 @@
 
                     if (data.success) {
                         closeModal(method === 'BankTransfer' ? 'bankModal' : 'cardModal');
-                       document.getElementById('successModal').classList.add('show');
+                        document.getElementById('successModal').classList.add('show');
                         cart = [];
                         render();
                     } else {
