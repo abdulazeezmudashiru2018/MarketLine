@@ -8,8 +8,96 @@
 <head>
     <meta charset="utf-8" />
     <title>MarketLine - Order</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/order.css" />
-</head>
+
+    <!-- Visual Harmony CSS Overrides -->
+    <style>
+        /* 1. Dark Theme Page Background */
+        body.order-body {
+            background-color: #061108 !important;
+            background-image: radial-gradient(circle at center, #0c2012 0%, #040d06 100%) !important;
+            color: #f0fdf4 !important;
+            font-family: 'Poppins', sans-serif !important;
+            min-height: 100vh;
+        }
+
+        /* 2. Custom Colored Ambient Glow Orbs */
+        .orb1 { background: radial-gradient(circle, rgba(126, 217, 87, 0.25) 0%, transparent 70%) !important; }
+        .orb2 { background: radial-gradient(circle, rgba(255, 215, 106, 0.18) 0%, transparent 70%) !important; }
+        .orb3 { background: radial-gradient(circle, rgba(126, 217, 87, 0.15) 0%, transparent 70%) !important; }
+        .orb4 { background: radial-gradient(circle, rgba(255, 215, 106, 0.12) 0%, transparent 70%) !important; }
+
+        /* 3. Translucent Glassmorphic Main Panels */
+        .products-panel, .cart-panel {
+            background: rgba(10, 24, 13, 0.45) !important;
+            border: 1px solid rgba(126, 217, 87, 0.18) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5) !important;
+            border-radius: 16px !important;
+            overflow: hidden;
+        }
+
+        /* 4. Left Panel Header - Forest / Neon Green (Matching Left Circle) */
+        .panel-header.header-orange {
+            background: linear-gradient(135deg, rgba(126, 217, 87, 0.15), rgba(10, 24, 13, 0.95)) !important;
+            border-bottom: 2px solid #7ed957 !important;
+            color: #ffffff !important;
+        }
+        .panel-header.header-orange .header-icon {
+            background: #7ed957 !important;
+            color: #051007 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 0 15px rgba(126, 217, 87, 0.4) !important;
+        }
+
+        /* 5. Right Panel Header - Dark / Premium Gold (Matching Right Circle) */
+        .panel-header.header-blue {
+            background: linear-gradient(135deg, rgba(255, 215, 106, 0.15), rgba(10, 24, 13, 0.95)) !important;
+            border-bottom: 2px solid #ffd76a !important;
+            color: #ffffff !important;
+        }
+        .panel-header.header-blue .header-icon {
+            background: #ffd76a !important;
+            color: #051007 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 0 15px rgba(255, 215, 106, 0.4) !important;
+        }
+
+        /* 6. Dark Glowing Product Cards */
+        .product-card {
+            background: rgba(18, 38, 22, 0.35) !important;
+            border: 1px solid rgba(126, 217, 87, 0.12) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            border-radius: 14px !important;
+            padding: 15px !important;
+        }
+        .product-card:hover {
+            transform: translateY(-5px) scale(1.02) !important;
+            border-color: #7ed957 !important;
+            box-shadow: 0 0 25px rgba(126, 217, 87, 0.35) !important;
+            background: rgba(18, 38, 22, 0.6) !important;
+        }
+        .product-card h3 {
+            color: #ffffff !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+        }
+        .product-card .price {
+            color: #ffd76a !important; /* Gold price accent */
+            font-weight: 800 !important;
+            font-size: 17px !important;
+        }
+        .product-card .badge {
+            background: rgba(126, 217, 87, 0.12) !important;
+            color: #7ed957 !important;
+            border: 1px solid rgba(126, 
+
+
 <body class="order-body">
 
     <div class="glow-bg">
