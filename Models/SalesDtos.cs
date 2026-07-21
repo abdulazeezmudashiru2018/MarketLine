@@ -1,6 +1,4 @@
-﻿
-using System;
-
+﻿using System;
 using System.Collections.Generic;
 
 namespace MarketLine.Models
@@ -55,5 +53,46 @@ namespace MarketLine.Models
         public string Description { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
+    }
+
+    // ============================================================
+    // NEW: DTOs for Dashboard Popup Buttons
+    // (Total Sales, Highest, Lowest, Daily Sales)
+    // ============================================================
+
+    public class TotalSalesBreakdownDto
+    {
+        public decimal Today { get; set; }
+        public decimal Yesterday { get; set; }
+        public decimal ThisWeek { get; set; }
+        public decimal ThisMonth { get; set; }
+        public decimal ThisYear { get; set; }
+        public decimal AllTime { get; set; }
+        public int TotalTransactions { get; set; }
+    }
+
+    public class SaleDetailDto
+    {
+        public string CustomerName { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public DateTime Date { get; set; }
+        public string Source { get; set; } = string.Empty; // "Shop", "Invoice", "Online"
+        public List<SaleItemDto> Items { get; set; } = new();
+    }
+
+    public class SaleItemDto
+    {
+        public string Description { get; set; } = string.Empty;
+        public decimal Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+    }
+
+    public class DailySalesResponseDto
+    {
+        public string Date { get; set; } = string.Empty;
+        public decimal TotalForDay { get; set; }
+        public int Count { get; set; }
+        public List<SaleDetailDto> Sales { get; set; } = new();
     }
 }

@@ -1,10 +1,10 @@
-@{
+﻿@{
     ViewData["Title"] = "Add Sales";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/sales.css" asp-append-version="true" />
-    
+
     <!-- AI Futuristic Vision CSS Styles -->
     <style>
         .ai-video-container {
@@ -23,7 +23,7 @@
             width: 100%;
             height: auto;
             display: block;
-            transform: scaleX(1);
+            transform: scaleX(1); /* Flip if using front camera is handled dynamically in JS */
         }
 
         /* Neon Laser Scanner Line */
@@ -39,11 +39,18 @@
             z-index: 10;
         }
 
-        /* Escaped keyframes as @@ to bypass Razor parser */
         @@keyframes aiScanLaser {
-            0% { top: 0%; }
-            50% { top: 100%; }
-            100% { top: 0%; }
+            0% {
+                top: 0%;
+            }
+
+            50% {
+                top: 100%;
+            }
+
+            100% {
+                top: 0%;
+            }
         }
 
         /* Confidence Match Bar */
@@ -82,10 +89,16 @@
             animation: pulseActive 1s infinite alternate;
         }
 
-        /* Escaped keyframes as @@ */
         @@keyframes pulseActive {
-            from { transform: scale(1); opacity: 0.7; }
-            to { transform: scale(1.3); opacity: 1; }
+            from {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            to {
+                transform: scale(1.3);
+                opacity: 1;
+            }
         }
     </style>
 }
@@ -110,8 +123,8 @@
     </div>
 
     <div class="store-meta">
-        <p>?? Formal Dave Mercy Clinic, Idiagbo, Jebba, Kwara State.</p>
-        <p>?? 08000000000</p>
+        <p>📍 Formal Dave Mercy Clinic, Idiagbo, Jebba, Kwara State.</p>
+        <p>📞 08000000000</p>
     </div>
 
     <div class="customer-fields">
@@ -173,7 +186,7 @@
         </div>
         <div class="total-box">
             <span>TOTAL PRICE</span>
-            <strong id="grandTotal">?0</strong>
+            <strong id="grandTotal">₦0</strong>
         </div>
     </div>
 
@@ -199,11 +212,11 @@
                 <h3>Select Items</h3>
             </div>
             <div class="goods-drawer-search">
-                <input type="text" id="goodsSearchInput" placeholder="Search item�" autocomplete="off" />
+                <input type="text" id="goodsSearchInput" placeholder="Search item…" autocomplete="off" />
                 <button type="button" class="drawer-close-btn" id="btnCloseGoods" aria-label="Close">&times;</button>
             </div>
             <div class="goods-drawer-list" id="goodsDrawerList">
-                <div class="goods-drawer-empty">Loading�</div>
+                <div class="goods-drawer-empty">Loading…</div>
             </div>
         </aside>
     </div>
@@ -231,7 +244,7 @@
 
             <div id="cameraScanStep" style="display:none;">
                 <h3>Aim camera at the product</h3>
-                
+
                 <div class="ai-video-container">
                     <div class="ai-scanner-laser"></div>
                     <video id="cameraVideo" autoplay playsinline muted></video>
@@ -254,12 +267,12 @@
 </div>
 
 @section Scripts {
-    <!-- Load TensorFlow.js and MobileNet model CDN with escaped razor symbols (@@) -->
-    <script src="https://cdn.jsdelivr.net/npm/@@tensorflow/tfjs@@4.20.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@@tensorflow-models/mobilenet@@2.1.1/dist/mobilenet.min.js"></script>
-    
+    <!-- Load TensorFlow.js and MobileNet model CDN with escaped razor symbols -->
+    <script src="https://cdn.jsdelivr.net/npm/@@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+
     <script src="~/js/sales.js" asp-append-version="true"></script>
-    
+
     <!-- AI Scanner Operations Script -->
     <script>
         let aiModel = null;
@@ -273,265 +286,286 @@
 
         // ===== WEB AUDIO API - SCANNER BEEP =====
         function playScanBeep() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(950, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
-                
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.11);
-            } catch (e) {
-                console.warn("Audio context blocked by user interaction gesture.");
-            }
+        try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(950, audioCtx.currentTime); // High pitch scan beep
+        gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.11); // Short 110ms beep
+        } catch (e) {
+        console.warn("Audio context blocked by user interaction gesture.");
+        }
         }
 
         // ===== INITIALIZE AI ENGINE AND EXTRACT DATABASE FINGERPRINTS =====
         async function initializeAIVision() {
-            if (aiModel || isModelLoading) return;
-            isModelLoading = true;
-            updateStatusIndicator(false, "Loading AI Vision model...");
+        if (aiModel || isModelLoading) return;
+        isModelLoading = true;
+        updateStatusIndicator(false, "Loading AI Vision model...");
 
-            try {
-                aiModel = await mobilenet.load({ version: 1, alpha: 1.0 });
-                updateStatusIndicator(false, "Loading product catalog...");
+        try {
+        // Load TensorFlow MobileNet model
+        aiModel = await mobilenet.load({ version: 1, alpha: 1.0 });
+        updateStatusIndicator(false, "Loading product catalog...");
 
-                const response = await fetch('/Goods/Search');
-                const products = await response.json();
-                
-                updateStatusIndicator(false, "Scanning database product files...");
+        // Fetch current products from database
+        const response = await fetch('/Goods/Search');
+        const products = await response.json();
 
-                for (let product of products) {
-                    if (product.imagePath) {
-                        try {
-                            const fingerprint = await extractImageFingerprint(product.imagePath);
-                            aiProductsDb.push({
-                                id: product.id,
-                                name: product.name,
-                                price: product.price,
-                                fingerprint: fingerprint
-                            });
-                        } catch (imgError) {
-                            console.error(`Failed to index image for ${product.name}:`, imgError);
-                        }
-                    }
-                }
-                
-                isModelLoading = false;
-                updateStatusIndicator(true, `AI Active. Indexed ${aiProductsDb.length} products.`);
-            } catch (error) {
-                console.error("AI Initialization failed:", error);
-                isModelLoading = false;
-                updateStatusIndicator(false, "AI failed to initialize.");
-            }
+        updateStatusIndicator(false, "Scanning database product files...");
+
+        // Loop through and extract vectors of images
+        for (let product of products) {
+        if (product.imagePath) {
+        try {
+        const fingerprint = await extractImageFingerprint(product.imagePath);
+        aiProductsDb.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        fingerprint: fingerprint
+        });
+        } catch (imgError) {
+        console.error(`Failed to index image for ${product.name}:`, imgError);
+        }
+        }
         }
 
+        isModelLoading = false;
+        updateStatusIndicator(true, `AI Active. Indexed ${aiProductsDb.length} products.`);
+        } catch (error) {
+        console.error("AI Initialization failed:", error);
+        isModelLoading = false;
+        updateStatusIndicator(false, "AI failed to initialize.");
+        }
+        }
+
+        // Helper to load image securely via CORS and extract features
         function extractImageFingerprint(src) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.src = src;
-                
-                img.onload = async () => {
-                    try {
-                        const activation = aiModel.infer(img, true);
-                        const features = await activation.data();
-                        activation.dispose();
-                        resolve(features);
-                    } catch (e) {
-                        reject(e);
-                    }
-                };
-                img.onerror = (err) => reject(img.src + " load failed");
-            });
+        return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous"; // Essential to read Cloudinary pixels securely
+        img.src = src;
+
+        img.onload = async () => {
+        try {
+        // Extract activation layers up to the MobileNet bottleneck layer (raw features)
+        const activation = aiModel.infer(img, true);
+        const features = await activation.data();
+        activation.dispose(); // Avoid memory leaks
+        resolve(features);
+        } catch (e) {
+        reject(e);
+        }
+        };
+        img.onerror = (err) => reject(img.src + " load failed");
+        });
         }
 
         function updateStatusIndicator(isActive, text) {
-            const ind = document.getElementById("aiIndicator");
-            const txt = document.getElementById("cameraStatus");
-            if (ind && txt) {
-                txt.innerHTML = `<span class="ai-status-indicator ${isActive ? 'ai-status-active' : ''}" id="aiIndicator"></span> ${text}`;
-            }
+        const ind = document.getElementById("aiIndicator");
+        const txt = document.getElementById("cameraStatus");
+        if (ind && txt) {
+        txt.innerHTML = `<span class="ai-status-indicator ${isActive ? 'ai-status-active' : ''}" id="aiIndicator"></span> ${text}`;
+        }
         }
 
+        // ===== START CAMERA RUNTIME =====
         async function startCamera(facingMode) {
-            await initializeAIVision();
+        await initializeAIVision();
 
-            const video = document.getElementById("cameraVideo");
-            const chooseStep = document.getElementById("cameraChooseStep");
-            const scanStep = document.getElementById("cameraScanStep");
+        const video = document.getElementById("cameraVideo");
+        const chooseStep = document.getElementById("cameraChooseStep");
+        const scanStep = document.getElementById("cameraScanStep");
 
-            try {
-                activeStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } }
-                });
-                
-                video.srcObject = activeStream;
-                chooseStep.style.display = "none";
-                scanStep.style.display = "block";
-                isCameraScanning = true;
-                
-                requestAnimationFrame(processCameraFrame);
-            } catch (err) {
-                alert("Unable to open camera: " + err.message);
-                stopCamera();
-            }
+        try {
+        activeStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } }
+        });
+
+        video.srcObject = activeStream;
+        chooseStep.style.display = "none";
+        scanStep.style.display = "block";
+        isCameraScanning = true;
+
+        requestAnimationFrame(processCameraFrame);
+        } catch (err) {
+        alert("Unable to open camera: " + err.message);
+        stopCamera();
+        }
         }
 
+        // ===== COSINE SIMILARITY MATH MATCHER =====
         function calculateSimilarity(vecA, vecB) {
-            let dotProduct = 0.0;
-            let normA = 0.0;
-            let normB = 0.0;
-            for (let i = 0; i < vecA.length; i++) {
-                dotProduct += vecA[i] * vecB[i];
-                normA += vecA[i] * vecA[i];
-                normB += vecB[i] * vecB[i];
-            }
-            return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        let dotProduct = 0.0;
+        let normA = 0.0;
+        let normB = 0.0;
+        for (let i = 0; i < vecA.length; i++) {
+        dotProduct += vecA[i] * vecB[i];
+        normA += vecA[i] * vecA[i];
+        normB += vecB[i] * vecB[i];
+        }
+        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
         }
 
+        // ===== CORE FRAME PROCESSING LOOP =====
         async function processCameraFrame() {
-            if (!isCameraScanning || scanningLock) return;
+        if (!isCameraScanning || scanningLock) return;
 
-            const video = document.getElementById("cameraVideo");
-            const confBar = document.getElementById("aiConfidenceProgress");
+        const video = document.getElementById("cameraVideo");
+        const confBar = document.getElementById("aiConfidenceProgress");
 
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                try {
-                    const frameActivation = aiModel.infer(video, true);
-                    const frameFingerprint = await frameActivation.data();
-                    frameActivation.dispose();
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        try {
+        // Extract features from live frame
+        const frameActivation = aiModel.infer(video, true);
+        const frameFingerprint = await frameActivation.data();
+        frameActivation.dispose();
 
-                    let bestMatch = null;
-                    let highestScore = 0.0;
+        let bestMatch = null;
+        let highestScore = 0.0;
 
-                    for (let item of aiProductsDb) {
-                        const score = calculateSimilarity(frameFingerprint, item.fingerprint);
-                        if (score > highestScore) {
-                            highestScore = score;
-                            bestMatch = item;
-                        }
-                    }
-
-                    confBar.style.width = `${highestScore * 100}%`;
-
-                    if (highestScore > 0.86) {
-                        updateStatusIndicator(true, `Matching: <strong>${bestMatch.name}</strong> (${Math.round(highestScore * 100)}%)`);
-                        
-                        if (lastMatchedId === bestMatch.id) {
-                            consecutiveMatches++;
-                        } else {
-                            consecutiveMatches = 1;
-                            lastMatchedId = bestMatch.id;
-                        }
-
-                        if (consecutiveMatches >= 3) {
-                            triggerProductMatch(bestMatch);
-                        }
-                    } else {
-                        consecutiveMatches = 0;
-                        updateStatusIndicator(true, "Searching for product...");
-                    }
-
-                } catch (e) {
-                    console.error("Frame processing failed:", e);
-                }
-            }
-
-            if (isCameraScanning) {
-                setTimeout(() => {
-                    requestAnimationFrame(processCameraFrame);
-                }, 150);
-            }
+        // Compute matches against database
+        for (let item of aiProductsDb) {
+        const score = calculateSimilarity(frameFingerprint, item.fingerprint);
+        if (score > highestScore) {
+        highestScore = score;
+        bestMatch = item;
+        }
         }
 
+        // Update UI visual feedback elements
+        confBar.style.width = `${highestScore * 100}%`;
+
+        if (highestScore > 0.86) {
+        updateStatusIndicator(true, `Matching: <strong>${bestMatch.name}</strong> (${Math.round(highestScore * 100)}%)`);
+
+        if (lastMatchedId === bestMatch.id) {
+        consecutiveMatches++;
+        } else {
+        consecutiveMatches = 1;
+        lastMatchedId = bestMatch.id;
+        }
+
+        // Product matched consistently across 3 frames (stabilization)
+        if (consecutiveMatches >= 3) {
+        triggerProductMatch(bestMatch);
+        }
+        } else {
+        consecutiveMatches = 0;
+        updateStatusIndicator(true, "Searching for product...");
+        }
+
+        } catch (e) {
+        console.error("Frame processing failed:", e);
+        }
+        }
+
+        if (isCameraScanning) {
+        // Keep processing next frame roughly every 150ms to keep CPU usage balanced
+        setTimeout(() => {
+        requestAnimationFrame(processCameraFrame);
+        }, 150);
+        }
+        }
+
+        // ===== TRIGGER MATCH AND SIMULATE ROW ADDITION =====
         function triggerProductMatch(product) {
-            scanningLock = true;
-            isCameraScanning = false;
-            
-            playScanBeep();
-            updateStatusIndicator(true, `? ADDED: <strong>${product.name}</strong>!`);
-            
-            const virtualContainer = document.createElement("div");
-            virtualContainer.className = "goods-item drawer-item";
-            virtualContainer.style.display = "none";
+        scanningLock = true;
+        isCameraScanning = false;
 
-            const virtualBtn = document.createElement("button");
-            virtualBtn.className = "btn-add drawer-add-btn";
-            virtualBtn.dataset.id = product.id;
-            virtualBtn.dataset.name = product.name;
-            virtualBtn.dataset.price = product.price;
+        playScanBeep();
+        updateStatusIndicator(true, `✅ ADDED: <strong>${product.name}</strong>!`);
 
-            virtualContainer.appendChild(virtualBtn);
-            document.body.appendChild(virtualContainer);
+        // Build virtual button simulation to let sales.js trigger its internal row additions perfectly!
+        const virtualContainer = document.createElement("div");
+        virtualContainer.className = "goods-item drawer-item";
+        virtualContainer.style.display = "none";
 
-            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
-            virtualBtn.dispatchEvent(clickEvent);
+        const virtualBtn = document.createElement("button");
+        virtualBtn.className = "btn-add drawer-add-btn";
+        virtualBtn.dataset.id = product.id;
+        virtualBtn.dataset.name = product.name;
+        virtualBtn.dataset.price = product.price;
 
-            virtualContainer.remove();
+        virtualContainer.appendChild(virtualBtn);
+        document.body.appendChild(virtualContainer);
 
-            setTimeout(() => {
-                scanningLock = false;
-                isCameraScanning = true;
-                consecutiveMatches = 0;
-                lastMatchedId = null;
-                const confBar = document.getElementById("aiConfidenceProgress");
-                if (confBar) confBar.style.width = '0%';
-                requestAnimationFrame(processCameraFrame);
-            }, 2500);
+        // Dispatch click event that bubbles up
+        const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+        virtualBtn.dispatchEvent(clickEvent);
+
+        // Cleanup DOM
+        virtualContainer.remove();
+
+        // Set visual cooldown before unlocking scanning again
+        setTimeout(() => {
+        scanningLock = false;
+        isCameraScanning = true;
+        consecutiveMatches = 0;
+        lastMatchedId = null;
+        const confBar = document.getElementById("aiConfidenceProgress");
+        if (confBar) confBar.style.width = '0%';
+        requestAnimationFrame(processCameraFrame);
+        }, 2500); // 2.5s cooldown
         }
 
         function stopCamera() {
-            isCameraScanning = false;
-            if (activeStream) {
-                activeStream.getTracks().forEach(track => track.stop());
-                activeStream = null;
-            }
-            document.getElementById("cameraScanStep").style.display = "none";
-            document.getElementById("cameraChooseStep").style.display = "block";
-            document.getElementById("cameraModalOverlay").classList.remove("show");
-            
-            const confBar = document.getElementById("aiConfidenceProgress");
-            if (confBar) confBar.style.width = '0%';
+        isCameraScanning = false;
+        if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+        activeStream = null;
+        }
+        document.getElementById("cameraScanStep").style.display = "none";
+        document.getElementById("cameraChooseStep").style.display = "block";
+        document.getElementById("cameraModalOverlay").classList.remove("show");
+
+        const confBar = document.getElementById("aiConfidenceProgress");
+        if (confBar) confBar.style.width = '0%';
         }
 
+        // ===== HOOK INTERFACE BUTTONS =====
         document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(initializeAIVision, 1000);
+        // Trigger pre-loading and indexing when page completes load to avoid waiting later
+        setTimeout(initializeAIVision, 1000);
 
-            const btnOpen = document.getElementById("btnOpenCamera");
-            const btnCancel = document.getElementById("btnCancelCamera");
-            const btnStop = document.getElementById("btnStopCamera");
-            const btnFront = document.getElementById("btnUseFrontCamera");
-            const btnBack = document.getElementById("btnUseBackCamera");
+        // Hijack barcode buttons in sales.js and direct them to AI Vision Engine
+        const btnOpen = document.getElementById("btnOpenCamera");
+        const btnCancel = document.getElementById("btnCancelCamera");
+        const btnStop = document.getElementById("btnStopCamera");
+        const btnFront = document.getElementById("btnUseFrontCamera");
+        const btnBack = document.getElementById("btnUseBackCamera");
 
-            if (btnOpen) {
-                btnOpen.addEventListener("click", (e) => {
-                    e.stopImmediatePropagation();
-                    document.getElementById("cameraModalOverlay").classList.add("show");
-                });
-            }
+        if (btnOpen) {
+        btnOpen.addEventListener("click", (e) => {
+        e.stopImmediatePropagation(); // Stops old barcode scanner actions
+        document.getElementById("cameraModalOverlay").classList.add("show");
+        });
+        }
 
-            if (btnFront) {
-                btnFront.addEventListener("click", () => startCamera("user"));
-            }
+        if (btnFront) {
+        btnFront.addEventListener("click", () => startCamera("user"));
+        }
 
-            if (btnBack) {
-                btnBack.addEventListener("click", () => startCamera("environment"));
-            }
+        if (btnBack) {
+        btnBack.addEventListener("click", () => startCamera("environment"));
+        }
 
-            if (btnStop) {
-                btnStop.addEventListener("click", stopCamera);
-            }
+        if (btnStop) {
+        btnStop.addEventListener("click", stopCamera);
+        }
 
-            if (btnCancel) {
-                btnCancel.addEventListener("click", stopCamera);
-            }
+        if (btnCancel) {
+        btnCancel.addEventListener("click", stopCamera);
+        }
         });
     </script>
 }

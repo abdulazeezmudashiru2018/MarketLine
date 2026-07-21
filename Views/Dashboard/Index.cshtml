@@ -105,17 +105,15 @@
         line-height: 1.2;
         margin-top: 2px;
     }
-
-
 </style>
 
 
 <style>
     /* ==========================================
-           SAFE POSITION CHANGE:
-           Moves graph + bonus wheel left visually only.
-           Does NOT change dashboard/card dimensions.
-           ========================================== */
+               SAFE POSITION CHANGE:
+               Moves graph + bonus wheel left visually only.
+               Does NOT change dashboard/card dimensions.
+               ========================================== */
     @@media (min-width: 900px) {
         .ml-panel-body .ml-chart {
             transform: translateX(-90px) !important;
@@ -123,10 +121,10 @@
     }
 
     /* ==========================================
-           BONUS WHEEL:
-           Original size: 150px
-           New size: 188px (about 25% larger)
-           ========================================== */
+               BONUS WHEEL:
+               Original size: 150px
+               New size: 188px (about 25% larger)
+               ========================================== */
     #bonusWheelSvg {
         width: 188px !important;
         height: 188px !important;
@@ -374,43 +372,410 @@
         }
 </style>
 
-<section class="ml-cards">
+<!-- ============================================================
+     ✨ NEW: GLOWING BUTTON STYLES (replaces old .ml-cards look)
+     ============================================================ -->
+<style>
+    .ml-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
 
-    <div class="ml-card ml-card-green">
-        <div class="ml-card-head">
+    @@media (max-width: 900px) {
+        .ml-buttons {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 500px) {
+        .ml-buttons {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .ml-btn {
+        position: relative;
+        border: none;
+        border-radius: 18px;
+        padding: 22px 20px;
+        cursor: pointer;
+        color: white;
+        font-family: inherit;
+        text-align: left;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        animation: mlPulse 3s ease-in-out infinite;
+    }
+
+        .ml-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .ml-btn:active {
+            transform: translateY(-2px) scale(0.99);
+        }
+
+        .ml-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+
+        .ml-btn:hover::before {
+            opacity: 1;
+        }
+
+    .ml-btn-head {
+        font-size: 15px;
+        font-weight: 600;
+        opacity: 0.95;
+        margin-bottom: 10px;
+    }
+
+    .ml-btn-value {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .ml-btn-hint {
+        font-size: 11px;
+        opacity: 0.85;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .ml-btn-green {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+    }
+
+    .ml-btn-red {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+    }
+
+    .ml-btn-blue {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+    }
+
+    .ml-btn-purple {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+    }
+
+    @@keyframes mlPulse {
+        0%, 100% {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        50% {
+            box-shadow: 0 12px 35px rgba(255,255,255,0.15), 0 8px 25px rgba(0,0,0,0.3);
+        }
+    }
+
+    /* ===== NEW MODAL POPUP STYLES ===== */
+    .ml-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.75);
+        z-index: 99999;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px);
+        padding: 20px;
+    }
+
+        .ml-modal-overlay.active {
+            display: flex;
+        }
+
+    .ml-modal {
+        background: #1e293b;
+        color: white;
+        width: 100%;
+        max-width: 650px;
+        max-height: 85vh;
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        animation: mlSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @@keyframes mlSlideUp {
+        from {
+            transform: translateY(50px) scale(0.9);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+
+    .ml-modal-header {
+        padding: 20px 25px;
+        background: linear-gradient(135deg, #334155, #1e293b);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+        .ml-modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+    .ml-modal-close {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        font-size: 22px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .ml-modal-close:hover {
+            background: rgba(239, 68, 68, 0.8);
+            transform: rotate(90deg);
+        }
+
+    .ml-modal-body {
+        padding: 25px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .ml-loading {
+        text-align: center;
+        padding: 40px;
+        opacity: 0.7;
+    }
+
+    .ml-sale-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 14px;
+        transition: all 0.2s;
+    }
+
+        .ml-sale-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+    .ml-sale-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+        gap: 10px;
+    }
+
+    .ml-sale-name {
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .ml-sale-amount {
+        color: #10b981;
+        font-weight: 800;
+        font-size: 18px;
+        white-space: nowrap;
+    }
+
+    .ml-sale-meta {
+        font-size: 12px;
+        opacity: 0.7;
+        margin-bottom: 8px;
+    }
+
+    .ml-sale-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        background: rgba(139, 92, 246, 0.3);
+        font-size: 11px;
+        text-transform: uppercase;
+        margin-left: 8px;
+    }
+
+    .ml-sale-items {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed rgba(255,255,255,0.15);
+    }
+
+    .ml-sale-item-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 4px 0;
+        opacity: 0.9;
+        gap: 10px;
+    }
+
+    .ml-no-items {
+        font-size: 12px;
+        opacity: 0.5;
+        font-style: italic;
+        margin-top: 8px;
+    }
+
+    .ml-breakdown-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .ml-breakdown-item {
+        background: rgba(255,255,255,0.05);
+        padding: 18px;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .ml-breakdown-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+    }
+
+    .ml-breakdown-value {
+        font-size: 22px;
+        font-weight: 800;
+        color: #10b981;
+    }
+
+    .ml-date-picker-wrap {
+        text-align: center;
+        padding: 20px 0;
+    }
+
+        .ml-date-picker-wrap label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .ml-date-picker-wrap input[type="date"] {
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 2px solid rgba(139, 92, 246, 0.5);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+            .ml-date-picker-wrap input[type="date"]:focus {
+                outline: none;
+                border-color: #8b5cf6;
+                box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+            }
+
+    .ml-daily-summary {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        padding: 15px;
+        border-radius: 12px;
+        margin: 15px 0;
+        text-align: center;
+    }
+
+        .ml-daily-summary strong {
+            font-size: 24px;
+            display: block;
+            margin-top: 5px;
+        }
+</style>
+
+
+<!-- ============================================================
+     ✨ NEW: GLOWING BUTTONS (replaces old .ml-cards section)
+     ============================================================ -->
+<section class="ml-buttons">
+
+    <button type="button" class="ml-btn ml-btn-green" onclick="openHighestModal()">
+        <div class="ml-btn-head">
             <span>Highest Sales</span>
-            <svg viewBox="0 0 24 24"><path d="M6 18 18 6M18 6h-6M18 6v6" /></svg>
         </div>
-        <div class="ml-card-value">₦@Model.HighestSale.ToString("N0")</div>
-        <div class="ml-card-icon">🏆</div>
-    </div>
+        <div class="ml-btn-value">₦@Model.HighestSale.ToString("N0")</div>
+        <div class="ml-btn-hint">Click to view top 5</div>
+    </button>
 
-    <div class="ml-card ml-card-red">
-        <div class="ml-card-head">
+    <button type="button" class="ml-btn ml-btn-red" onclick="openLowestModal()">
+        <div class="ml-btn-head">
             <span>Lowest Sales</span>
-            <svg viewBox="0 0 24 24"><path d="M6 6 18 18M18 18v-6M18 18h-6" /></svg>
         </div>
-        <div class="ml-card-value">₦@Model.LowestSale.ToString("N0")</div>
-        <div class="ml-card-icon">😟</div>
-    </div>
+        <div class="ml-btn-value">₦@Model.LowestSale.ToString("N0")</div>
+        <div class="ml-btn-hint">Click to view bottom 5</div>
+    </button>
 
-    <div class="ml-card ml-card-blue">
-        <div class="ml-card-head">
+    <button type="button" class="ml-btn ml-btn-blue" onclick="openTotalModal()">
+        <div class="ml-btn-head">
             <span>Total Sales</span>
         </div>
-        <div class="ml-card-value">₦@Model.TotalSales.ToString("N0")</div>
-    </div>
+        <div class="ml-btn-value">₦@Model.TotalSales.ToString("N0")</div>
+        <div class="ml-btn-hint">Click for breakdown</div>
+    </button>
 
-    <div class="ml-card ml-card-purple ml-card-coins">
-        <div class="ml-coin-stack">
-            <span class="coin c1"></span>
-            <span class="coin c2"></span>
-            <span class="coin c3"></span>
-            <span class="coin c4"></span>
+    <button type="button" class="ml-btn ml-btn-purple" onclick="openDailyModal()">
+        <div class="ml-btn-head">
+            <span>Daily Sales</span>
         </div>
-    </div>
+        <div class="ml-btn-value">Pick a Date</div>
+        <div class="ml-btn-hint">Click to choose date</div>
+    </button>
 
 </section>
+
+<!-- ============================================================
+     ✨ NEW: MODAL POPUP (used by all 4 buttons above)
+     ============================================================ -->
+<div id="mlModalOverlay" class="ml-modal-overlay" onclick="closeMlModal(event)">
+    <div class="ml-modal" onclick="event.stopPropagation()">
+        <div class="ml-modal-header">
+            <h3 id="mlModalTitle">Title</h3>
+            <button type="button" class="ml-modal-close" onclick="closeMlModal()">×</button>
+        </div>
+        <div class="ml-modal-body" id="mlModalBody">
+            <div class="ml-loading">Loading...</div>
+        </div>
+    </div>
+</div>
+
 
 <section class="ml-panel">
     <div class="ml-panel-header">
@@ -830,4 +1195,197 @@
 
         setCenterDefault();
     });
+</script>
+
+
+<!-- ============================================================
+     ✨ NEW: DASHBOARD BUTTON POPUP SCRIPTS
+     (Highest, Lowest, Total Breakdown, Daily Sales)
+     ============================================================ -->
+<script>
+    (function () {
+        const mlOverlay = document.getElementById('mlModalOverlay');
+        const mlTitle = document.getElementById('mlModalTitle');
+        const mlBody = document.getElementById('mlModalBody');
+
+        function openMlModal(title) {
+            mlTitle.textContent = title;
+            mlBody.innerHTML = '<div class="ml-loading">⏳ Loading...</div>';
+            mlOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        window.closeMlModal = function (event) {
+            if (event && event.target !== mlOverlay && !event.target.classList.contains('ml-modal-close')) return;
+            mlOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        // ESC to close
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && mlOverlay.classList.contains('active')) {
+                mlOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        function formatMoneyMl(n) {
+            return '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
+
+        function formatDateMl(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return '';
+            return d.toLocaleString('en-NG', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function renderSaleCard(sale) {
+            let itemsHtml = '';
+            if (sale.items && sale.items.length > 0) {
+                itemsHtml = '<div class="ml-sale-items">';
+                sale.items.forEach(function (item) {
+                    itemsHtml +=
+                        '<div class="ml-sale-item-row">' +
+                        '<span>📦 ' + item.description + ' × ' + item.quantity + '</span>' +
+                        '<span>' + formatMoneyMl(item.totalPrice) + '</span>' +
+                        '</div>';
+                });
+                itemsHtml += '</div>';
+            } else {
+                itemsHtml = '<div class="ml-no-items">No items recorded for this sale</div>';
+            }
+
+            return (
+                '<div class="ml-sale-card">' +
+                    '<div class="ml-sale-top">' +
+                        '<div>' +
+                            '<div class="ml-sale-name">' + sale.customerName + '</div>' +
+                            '<div class="ml-sale-meta">' + formatDateMl(sale.date) +
+                            '<span class="ml-sale-badge">' + sale.source + '</span></div>' +
+                        '</div>' +
+                        '<div class="ml-sale-amount">' + formatMoneyMl(sale.amount) + '</div>' +
+                    '</div>' +
+                    itemsHtml +
+                '</div>'
+            );
+        }
+
+        // ---------- TOP 5 HIGHEST ----------
+        window.openHighestModal = async function () {
+            openMlModal('Top 5 Highest Sales');
+            try {
+                const res = await fetch('/Dashboard/GetTop5HighestSales');
+                const data = await res.json();
+                if (!data || data.length === 0) {
+                    mlBody.innerHTML = '<div class="ml-loading">No sales yet.</div>';
+                    return;
+                }
+                mlBody.innerHTML = data.map(renderSaleCard).join('');
+            } catch (err) {
+                mlBody.innerHTML = '<div class="ml-loading">❌ Failed to load. Try again.</div>';
+            }
+        };
+
+        // ---------- TOP 5 LOWEST ----------
+        window.openLowestModal = async function () {
+            openMlModal('Top 5 Lowest Sales');
+            try {
+                const res = await fetch('/Dashboard/GetTop5LowestSales');
+                const data = await res.json();
+                if (!data || data.length === 0) {
+                    mlBody.innerHTML = '<div class="ml-loading">No sales yet.</div>';
+                    return;
+                }
+                mlBody.innerHTML = data.map(renderSaleCard).join('');
+            } catch (err) {
+                mlBody.innerHTML = '<div class="ml-loading">❌ Failed to load. Try again.</div>';
+            }
+        };
+
+        // ---------- TOTAL SALES BREAKDOWN ----------
+        window.openTotalModal = async function () {
+            openMlModal('Total Sales Breakdown');
+            try {
+                const res = await fetch('/Dashboard/GetTotalSalesBreakdown');
+                const d = await res.json();
+                mlBody.innerHTML =
+                    '<div class="ml-breakdown-grid">' +
+                        '<div class="ml-breakdown-item">' +
+                            '<div class="ml-breakdown-label">Today</div>' +
+                            '<div class="ml-breakdown-value">' + formatMoneyMl(d.today) + '</div>' +
+                        '</div>' +
+                        '<div class="ml-breakdown-item">' +
+                            '<div class="ml-breakdown-label">Yesterday</div>' +
+                            '<div class="ml-breakdown-value">' + formatMoneyMl(d.yesterday) + '</div>' +
+                        '</div>' +
+                        '<div class="ml-breakdown-item">' +
+                            '<div class="ml-breakdown-label">This Week</div>' +
+                            '<div class="ml-breakdown-value">' + formatMoneyMl(d.thisWeek) + '</div>' +
+                        '</div>' +
+                        '<div class="ml-breakdown-item">' +
+                            '<div class="ml-breakdown-label">This Month</div>' +
+                            '<div class="ml-breakdown-value">' + formatMoneyMl(d.thisMonth) + '</div>' +
+                        '</div>' +
+                        '<div class="ml-breakdown-item">' +
+                            '<div class="ml-breakdown-label">This Year</div>' +
+                            '<div class="ml-breakdown-value">' + formatMoneyMl(d.thisYear) + '</div>' +
+                        '</div>' +
+                        '<div class="ml-breakdown-item">' +
+                            '<div class="ml-breakdown-label">All Time (' + d.totalTransactions + ' txns)</div>' +
+                            '<div class="ml-breakdown-value">' + formatMoneyMl(d.allTime) + '</div>' +
+                        '</div>' +
+                    '</div>';
+            } catch (err) {
+                mlBody.innerHTML = '<div class="ml-loading">❌ Failed to load. Try again.</div>';
+            }
+        };
+
+        // ---------- DAILY SALES (with date picker) ----------
+        window.openDailyModal = function () {
+            openMlModal('Daily Sales');
+            const today = new Date().toISOString().split('T')[0];
+            mlBody.innerHTML =
+                '<div class="ml-date-picker-wrap">' +
+                    '<label>Pick a date to see all sales made on that day:</label>' +
+                    '<input type="date" id="mlDatePicker" max="' + today + '" value="' + today + '" />' +
+                '</div>' +
+                '<div id="mlDailyResults"></div>';
+
+            document.getElementById('mlDatePicker').addEventListener('change', function () {
+                loadDailySales(this.value);
+            });
+
+            loadDailySales(today);
+        };
+
+        async function loadDailySales(date) {
+            const resultsDiv = document.getElementById('mlDailyResults');
+            if (!resultsDiv) return;
+            resultsDiv.innerHTML = '<div class="ml-loading">⏳ Loading sales...</div>';
+            try {
+                const res = await fetch('/Dashboard/GetSalesByDate?date=' + date);
+                const d = await res.json();
+                if (!d.sales || d.sales.length === 0) {
+                    resultsDiv.innerHTML =
+                        '<div class="ml-daily-summary">' +
+                            'No sales on ' + d.date +
+                            '<strong>' + formatMoneyMl(0) + '</strong>' +
+                        '</div>';
+                    return;
+                }
+                resultsDiv.innerHTML =
+                    '<div class="ml-daily-summary">' +
+                        d.count + ' sale(s) on ' + d.date +
+                        '<strong>' + formatMoneyMl(d.totalForDay) + '</strong>' +
+                    '</div>' +
+                    d.sales.map(renderSaleCard).join('');
+            } catch (err) {
+                resultsDiv.innerHTML = '<div class="ml-loading">❌ Failed to load. Try again.</div>';
+            }
+        }
+    })();
 </script>
