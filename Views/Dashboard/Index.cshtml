@@ -379,27 +379,30 @@
     .ml-buttons {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
+        gap: 12px;
+        margin-bottom: 20px;
+        max-width: 50%; /* ✨ 50% width reduction */
     }
 
     @@media (max-width: 900px) {
         .ml-buttons {
             grid-template-columns: repeat(2, 1fr);
+            max-width: 75%;
         }
     }
 
     @@media (max-width: 500px) {
         .ml-buttons {
             grid-template-columns: 1fr;
+            max-width: 100%;
         }
     }
 
     .ml-btn {
         position: relative;
         border: none;
-        border-radius: 18px;
-        padding: 22px 20px;
+        border-radius: 12px;
+        padding: 11px 10px; /* ✨ 50% height reduction (was 22px 20px) */
         cursor: pointer;
         color: white;
         font-family: inherit;
