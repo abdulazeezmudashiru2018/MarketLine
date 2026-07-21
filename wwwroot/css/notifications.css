@@ -296,3 +296,212 @@
         color: #6b7280 !important;
         margin-bottom: 15px;
     }
+
+
+/* =============================================================
+   📱 MOBILE RESPONSIVENESS FIX
+   Added: Centers dropdowns and detail cards on mobile phones
+   Safe: Only affects screens ≤ 768px (mobile), desktop untouched
+   ============================================================= */
+
+@media (max-width: 768px) {
+
+    /* ===== FIX 1: Notification & Payment Dropdowns ===== */
+    /* Old issue: dropdown stuck to right edge, cut off screen */
+    /* Fix: Center dropdown horizontally, fit mobile screen */
+    .ml-dropdown {
+        position: fixed; /* fixed so it works on any scroll position */
+        top: 70px; /* just below navbar */
+        left: 50%; /* center horizontally */
+        right: auto;
+        transform: translateX(-50%); /* centering trick */
+        width: 92vw; /* almost full screen width */
+        max-width: 400px; /* but never too wide */
+        max-height: 70vh; /* fits screen height */
+    }
+
+    .ml-dropdown-header {
+        padding: 14px;
+        font-size: 15px;
+    }
+
+    .ml-dropdown-item {
+        padding: 12px 14px;
+        gap: 8px;
+    }
+
+        .ml-dropdown-item strong {
+            font-size: 13px;
+            word-break: break-word; /* long names wrap nicely */
+        }
+
+        .ml-dropdown-item small {
+            font-size: 11px;
+        }
+
+        .ml-dropdown-item .amt {
+            font-size: 13px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+
+    /* ===== FIX 2: Order Details Page ===== */
+    /* Old issue: card overflows, text runs off screen */
+    /* Fix: Reduce padding, center card, wrap long text */
+    .details-page {
+        margin: 15px auto;
+        padding: 10px;
+    }
+
+    .details-card,
+    .receipt-card {
+        padding: 20px 16px; /* tighter padding on mobile */
+        border-radius: 12px;
+    }
+
+    .details-header {
+        flex-direction: column; /* stack title + status vertically */
+        align-items: flex-start;
+        gap: 10px;
+        padding-bottom: 12px;
+        margin-bottom: 15px;
+    }
+
+        .details-header h1 {
+            font-size: 18px;
+            line-height: 1.3;
+        }
+
+    .status-pill {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+
+    .details-section {
+        margin-bottom: 18px;
+        padding-bottom: 15px;
+    }
+
+        .details-section h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .details-section p {
+            font-size: 13px;
+            padding: 4px 0;
+            word-break: break-word; /* long emails/addresses wrap */
+        }
+
+
+    /* ===== FIX 3: Items Table (scrollable if too wide) ===== */
+    .details-table {
+        display: block;
+        overflow-x: auto; /* scroll horizontally if needed */
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+        .details-table th,
+        .details-table td {
+            padding: 8px;
+            font-size: 12px !important;
+        }
+
+
+    /* ===== FIX 4: Total Amount ===== */
+    .total-amount {
+        font-size: 18px !important;
+        word-break: break-word;
+    }
+
+
+    /* ===== FIX 5: Back Button ===== */
+    .btn-back {
+        display: block; /* full width on mobile */
+        text-align: center;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+
+    /* ===== FIX 6: Payment Receipt Page ===== */
+    .receipt-card {
+        max-width: 100%;
+    }
+
+    .receipt-header h1 {
+        font-size: 22px;
+    }
+
+    .receipt-check {
+        font-size: 46px;
+        width: 65px;
+        height: 65px;
+        line-height: 65px;
+    }
+
+    .receipt-sub {
+        font-size: 13px;
+    }
+
+    .receipt-row {
+        font-size: 13px;
+        padding: 10px 0;
+        flex-wrap: wrap; /* stack if too long */
+        gap: 6px;
+    }
+
+        .receipt-row span {
+            font-size: 12px;
+        }
+
+        .receipt-row strong {
+            font-size: 13px;
+            word-break: break-word;
+            text-align: right;
+        }
+
+    .receipt-total {
+        padding: 15px 0;
+        font-size: 15px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+        .receipt-total strong {
+            font-size: 22px !important;
+        }
+
+    .receipt-footer {
+        margin-top: 20px;
+        font-size: 13px;
+    }
+}
+
+
+/* Extra tuning for very small phones (≤ 380px) */
+@media (max-width: 380px) {
+
+    .ml-dropdown {
+        width: 95vw;
+    }
+
+    .details-card,
+    .receipt-card {
+        padding: 15px 12px;
+    }
+
+    .details-header h1 {
+        font-size: 16px;
+    }
+
+    .details-section h3 {
+        font-size: 14px;
+    }
+
+    .receipt-header h1 {
+        font-size: 20px;
+    }
+}
